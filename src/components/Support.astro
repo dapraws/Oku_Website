@@ -21,7 +21,6 @@ const copy = {
       'the app language, and whether iCloud sync is on',
       'a screenshot or screen recording, if you can',
     ],
-    privacyNote: 'There is no need to send what you wrote in your entries, unless the problem is in the text itself.',
   },
   id: {
     title: 'Bantuan',
@@ -36,7 +35,6 @@ const copy = {
       'bahasa aplikasi, dan apakah sinkronisasi iCloud menyala',
       'screenshot atau rekaman layar, kalau bisa',
     ],
-    privacyNote: 'Isi catatanmu tidak perlu dikirim, kecuali masalahnya ada di tulisan itu sendiri.',
   },
 }[lang];
 ---
@@ -57,7 +55,6 @@ const copy = {
   <ul>
     {copy.checklist.map((item) => <li>{item}</li>)}
   </ul>
-  <p class="note">{copy.privacyNote}</p>
 </article>
 
 <style>
@@ -71,5 +68,4 @@ const copy = {
     line-height: 1.45;
   }
   .qa h3 { margin-top: 1.5rem; }
-  .note { color: var(--ink-2); }
 </style>
