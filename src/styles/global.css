@@ -15,12 +15,17 @@
   --polaroid-ink: #FEFCF6;
   --polaroid-hairline: #E8E2D0;
 
-  --serif: ui-serif, 'New York', Georgia, serif;
+  /* New York on Apple browsers; Source Serif 4 (self-hosted, optical sizes) elsewhere. */
+  --serif: ui-serif, 'New York', 'Source Serif 4 Variable', Georgia, serif;
   --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+  /* Web only: the writer's own hand on the compose sheet and margin notes. */
+  --hand: 'Schoolbell', cursive;
+  /* Polaroid captions, as in the app; Schoolbell where Bradley Hand is missing. */
+  --caption: 'Bradley Hand', 'Bradley Hand ITC', 'Schoolbell', cursive;
 
   --hairline: 0.5px;
   --gutter: 1rem;
-  --page: 68rem;
+  --page: 76rem;
   --measure: 38rem;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }

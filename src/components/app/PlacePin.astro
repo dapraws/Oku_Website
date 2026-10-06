@@ -1,0 +1,9 @@
+---
+// DESIGN.md PlacePin: a 2px ink ring on paper around a teak dot (1/3 of the pin).
+interface Props { size?: number }
+const { size = 18 } = Astro.props;
+---
+<svg class="pin" width={size} height={size} viewBox="0 0 18 18" aria-hidden="true">
+  <circle cx="9" cy="9" r="8" fill="var(--paper)" stroke="var(--ink)" stroke-width="2" />
+  <circle cx="9" cy="9" r="3" fill="var(--teak)" />
+</svg>

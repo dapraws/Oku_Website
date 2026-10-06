@@ -1,0 +1,251 @@
+---
+// The hero: Compose's dot-grid sheet, writing itself. Title and words type in the writer's
+// hand, then the day is marked: mood, reasons, place, a photo. Without JS, or with Reduce
+// Motion, the finished entry is simply there.
+import Icon from './Icon.astro';
+import PlacePin from './PlacePin.astro';
+import Polaroid from '../Polaroid.astro';
+import sunset from '../../assets/photos/sunset.webp';
+
+interface Props {
+  lang: 'en' | 'id';
+  title: string;
+  line: string;
+  note: string;
+}
+const { lang, title, line, note } = Astro.props;
+
+const t = {
+  en: {
+    today: 'Today',
+    feeling: 'Feeling', reason: 'Reason', where: 'Where',
+    moods: ['Heavy', 'Sad', 'Neutral', 'Good', 'Bright'],
+    reasons: ['Work', 'Family', 'Self', 'Health'],
+    place: 'Semarang',
+    caption: 'golden hour',
+  },
+  id: {
+    today: 'Hari ini',
+    feeling: 'Perasaan', reason: 'Alasan', where: 'Di mana',
+    moods: ['Berat', 'Sedih', 'Tenang', 'Baik', 'Cerah'],
+    reasons: ['Kerja', 'Keluarga', 'Diri sendiri', 'Kesehatan'],
+    place: 'Semarang',
+    caption: 'jam emas',
+  },
+}[lang];
+const chosenMood = 2;
+const chosenReasons = [2, 3];
+---
+<figure class="compose" data-compose role="img" aria-label={`${title}. ${line}`}>
+  <div class="sheet" aria-hidden="true">
+    <p class="label date" data-date data-lang={lang}>{t.today}</p>
+    <p class="title" data-type="title">{title}</p>
+    <p class="words" data-type="words">{line}</p>
+
+    <div class="section" data-step>
+      <p class="label"><Icon name="smiley" size={15} />{t.feeling}</p>
+      <div class="chips">
+        {t.moods.map((m, i) => <span class:list={['chip', { on: i === chosenMood }]} data-pick={i === chosenMood ? '' : undefined}><i></i>{m}</span>)}
+      </div>
+    </div>
+
+    <div class="section" data-step>
+      <p class="label"><Icon name="question" size={15} />{t.reason}</p>
+      <div class="chips">
+        {t.reasons.map((r, i) => <span class:list={['chip', { on: chosenReasons.includes(i) }]} data-pick={chosenReasons.includes(i) ? '' : undefined}>{r}</span>)}
+      </div>
+    </div>
+
+    <div class="section where" data-step>
+      <p class="label"><Icon name="mapPin" size={15} />{t.where}</p>
+      <span class="place"><PlacePin size={16} />{t.place}</span>
+    </div>
+  </div>
+
+  <div class="photo" data-drop aria-hidden="true">
+    <Polaroid src={sunset} caption={t.caption} tilt={4} />
+  </div>
+
+  <p class="note" data-note aria-hidden="true">
+    <svg viewBox="0 0 60 30" width="46" height="23"><path d="M58 4 C40 6 22 12 8 24 M8 24 L9 14 M8 24 L18 23" /></svg>
+    {note}
+  </p>
+</figure>
+
+<script>
+  const fig = document.querySelector<HTMLElement>('[data-compose]');
+  const date = fig?.querySelector<HTMLElement>('[data-date]');
+  if (date) {
+    const lang = date.dataset.lang === 'id' ? 'id-ID' : 'en-GB';
+    const today = new Intl.DateTimeFormat(lang, { weekday: 'long', day: 'numeric', month: 'long' })
+      .formatToParts(new Date());
+    const get = (k: string) => today.find((p) => p.type === k)?.value ?? '';
+    // App order: 6 OCTOBER · TUESDAY
+    date.textContent = `${get('day')} ${get('month')} · ${get('weekday')}`;
+  }
+
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (fig && !still) {
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const typers = [...fig.querySelectorAll<HTMLElement>('[data-type]')];
+    const steps = [...fig.querySelectorAll<HTMLElement>('[data-step]')];
+    const drop = fig.querySelector<HTMLElement>('[data-drop]');
+    const note = fig.querySelector<HTMLElement>('[data-note]');
+    const caret = document.createElement('span');
+    caret.className = 'caret';
+
+    // Stage: keep each text's full height so nothing below jumps while it types.
+    const texts = typers.map((el) => el.textContent ?? '');
+    typers.forEach((el, i) => {
+      const done = document.createElement('span');
+      const rest = document.createElement('span');
+      rest.className = 'rest';
+      rest.textContent = texts[i];
+      el.replaceChildren(done, rest);
+    });
+    fig.classList.add('staged');
+
+    const type = async (el: HTMLElement, text: string, speed: number) => {
+      const [done, rest] = el.children as unknown as HTMLElement[];
+      el.insertBefore(caret, rest);
+      for (let i = 1; i <= text.length; i++) {
+        done.textContent = text.slice(0, i);
+        rest.textContent = text.slice(i);
+        const ch = text[i - 1];
+        await wait('.!?'.includes(ch) ? 360 : ',;'.includes(ch) ? 160 : speed + Math.random() * speed);
+      }
+    };
+
+    const play = async () => {
+      await wait(500);
+      await type(typers[0], texts[0], 55);
+      await wait(350);
+      await type(typers[1], texts[1], 16);
+      await wait(500);
+      for (const step of steps) {
+        step.classList.add('shown');
+        await wait(260);
+        for (const pick of step.querySelectorAll<HTMLElement>('[data-pick]')) {
+          pick.classList.add('picked');
+          if (step === steps[0]) note?.classList.add('shown');
+          await wait(280);
+        }
+        await wait(160);
+      }
+      drop?.classList.add('shown');
+    };
+    play();
+  }
+</script>
+
+<style>
+  .compose {
+    position: relative;
+    margin: 0;
+  }
+  .sheet {
+    position: relative;
+    padding: 1.5rem 1.5rem 1.75rem;
+    background-color: var(--paper);
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--ink-3) 35%, transparent) 0.75px, transparent 1.1px);
+    background-size: 20px 20px;
+    background-position: 10px 10px;
+    border: var(--hairline) solid var(--rule);
+    box-shadow: var(--shadow-print);
+  }
+  p { margin: 0; }
+  .label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ink-2);
+  }
+  .date { margin-bottom: 1.25rem; }
+  .title {
+    font-family: var(--hand);
+    font-size: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+  }
+  .words {
+    font-family: var(--hand);
+    font-size: clamp(1.1875rem, 1.05rem + 0.4vw, 1.375rem);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+  .section {
+    padding: 0.875rem 0;
+    border-top: var(--hairline) solid var(--rule);
+  }
+  .section .label { margin-bottom: 0.625rem; }
+  .where { display: flex; align-items: center; gap: 2rem; }
+  .where .label { margin: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+  /* DESIGN.md chip: callout serif, 0.5pt rule outline, 2px radius */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.9375rem;
+    color: var(--ink-2);
+    border: var(--hairline) solid var(--rule);
+    border-radius: 2px;
+    transition: background-color 200ms ease-out, border-color 200ms ease-out, color 200ms ease-out;
+  }
+  .chip i { width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3); transition: background-color 200ms ease-out; }
+  .chip.on { background: var(--paper-raised); color: var(--ink); border-color: var(--teak); }
+  .chip.on i { background: var(--teak); }
+  .place { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 1.0625rem; }
+
+  /* Phones: the print hangs below the sheet, clear of the place row. */
+  .photo {
+    position: absolute;
+    right: -0.25rem;
+    bottom: -7rem;
+    width: 8.5rem;
+  }
+  @media (min-width: 40rem) {
+    .photo { right: -1.25rem; bottom: -3.5rem; width: 9.5rem; }
+  }
+  .photo :global(.polaroid) { width: 100%; padding: 0.5rem 0.5rem 0; }
+  .photo :global(figcaption) { height: 1.875rem; font-size: 0.9375rem; }
+
+  /* A margin note under the sheet, pointing back up at the mood. */
+  .note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin: 1.25rem 0 0 0.5rem;
+    font-family: var(--hand);
+    font-size: 1.3125rem;
+    line-height: 1.1;
+    color: var(--teak);
+    rotate: -2deg;
+    max-width: min(16rem, calc(100% - 9.5rem));
+  }
+  .note svg { flex: none; rotate: 70deg; margin-top: -0.75rem; }
+  .note path { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Staged by the script only. */
+  .staged :global(.rest) { visibility: hidden; }
+  .staged :global(.caret) {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin: 0 1px -0.12em;
+    background: var(--teak);
+    animation: blink 1s steps(1) infinite;
+  }
+  .staged [data-step] { opacity: 0; translate: 0 6px; transition: opacity 320ms var(--ease), translate 320ms var(--ease); }
+  .staged [data-step].shown { opacity: 1; translate: 0 0; }
+  .staged .chip.on { background: transparent; color: var(--ink-2); border-color: var(--rule); }
+  .staged .chip.on i { background: var(--ink-3); }
+  .staged .chip.on.picked { background: var(--paper-raised); color: var(--ink); border-color: var(--teak); }
+  .staged .chip.on.picked i { background: var(--teak); }
+  .staged .note { opacity: 0; filter: blur(4px); transition: opacity 320ms ease-out, filter 320ms ease-out; }
+  .staged .note.shown { opacity: 1; filter: none; }
+  .staged .photo { opacity: 0; translate: 0.5rem -1.5rem; rotate: -6deg; transition: opacity 260ms ease-out, translate 600ms var(--ease), rotate 600ms var(--ease); }
+  .staged .photo.shown { opacity: 1; translate: 0 0; rotate: 0deg; }
+  @keyframes blink { 50% { opacity: 0; } }
+</style>

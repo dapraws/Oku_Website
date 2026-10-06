@@ -1,0 +1,23 @@
+---
+// Phosphor, regular weight, as in the app.
+import smiley from '@phosphor-icons/core/regular/smiley.svg?raw';
+import question from '@phosphor-icons/core/regular/question.svg?raw';
+import users from '@phosphor-icons/core/regular/users.svg?raw';
+import mapPin from '@phosphor-icons/core/regular/map-pin.svg?raw';
+import image from '@phosphor-icons/core/regular/image.svg?raw';
+import notebook from '@phosphor-icons/core/regular/notebook.svg?raw';
+import calendarDots from '@phosphor-icons/core/regular/calendar-dots.svg?raw';
+import calendarCheck from '@phosphor-icons/core/regular/calendar-check.svg?raw';
+
+const icons = { smiley, question, users, mapPin, image, notebook, calendarDots, calendarCheck };
+export type IconName = keyof typeof icons;
+
+interface Props { name: IconName; size?: number }
+const { name, size = 16 } = Astro.props;
+const svg = icons[name].replace('<svg ', `<svg width="${size}" height="${size}" aria-hidden="true" `);
+---
+<span class="icon" set:html={svg} />
+
+<style>
+  .icon { display: inline-flex; flex: none; color: currentColor; }
+</style>

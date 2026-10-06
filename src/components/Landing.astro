@@ -1,10 +1,12 @@
 ---
-// The landing page, "Inward": every ring on the page is centred on the ink dot at the end.
-// Section copy is STORE.md's description and screenshot lines; new lines were approved
-// with Darrel on 2026-10-07.
-import Mark from './Mark.astro';
+// The landing page, "Inward". An entry writes itself, the page moves through the ways Oku
+// looks back, and every ring on the page is centred on the ink dot that holds the privacy
+// section. The app is rebuilt from its own components; one real screen (the map) stays as
+// proof. Copy: STORE.md, plus lines approved with Darrel on 2026-10-07.
 import Screen from './Screen.astro';
-import Polaroid from './Polaroid.astro';
+import ComposeSheet from './app/ComposeSheet.astro';
+import EntryRow from './app/EntryRow.astro';
+import Insights from './app/Insights.astro';
 import sunset from '../assets/photos/sunset.webp';
 import hills from '../assets/photos/hills.webp';
 import { chrome, href, type Lang } from '../i18n';
@@ -16,25 +18,32 @@ const copy = {
   en: {
     lead: 'Write about your day. Everything you write stays with you.',
     kanji: 'Named from Japanese 奥 — the inner, hidden interior of a place.',
-    world: {
-      title: 'See where your days happened.',
-      body: 'Home shows today and, when there is one, an entry from this day in an earlier year. Stories lays your entries out on a map, on a timeline, and by the people in them. Insights shows how your days have felt over time, when you tend to write, and what your days were about, without scores or advice.',
-      map: { label: 'Stories', alt: 'Stories, Map: entries pinned across Java and Bali, with the places listed below.' },
-      insights: { label: 'Insights', alt: 'Insights: entry counts, and how the last 30 days have felt.' },
-    },
-    day: {
-      title: 'Mark the day in a word.',
-      body: 'Mark how the day felt in one word, from Heavy to Bright, and pick up to three reasons why. Add the place, the people who were there, and a few photos, which Oku keeps as polaroids.',
-      compose: { label: 'Compose', alt: 'Writing an entry: mood, reasons, the person, the place and photos filled in.' },
-      photos: 'Photos kept like polaroids.',
-      captions: ['golden hour', 'the long way round'],
-    },
-    page: {
-      title: 'Write a line or a page.',
-      body: 'If you don’t know how to start, borrow a line and keep going. Missed a day? Write it under its own date.',
-      today: 'Today',
+    compose: {
+      title: 'Suddenly quiet',
       line: 'I felt calm today. Honestly, it feels a little strange. After so long with my heart in pieces, tired from pretending to be strong all the time, today everything suddenly went quiet.',
-      home: { label: 'Home', alt: 'Home: the greeting, today’s writing card and recent entries.' },
+      note: 'one word for the whole day',
+    },
+    write: {
+      title: 'Write a line or a page.',
+      body: 'Mark how the day felt in one word, from Heavy to Bright, and pick up to three reasons why. Add the place, the people who were there, and a few photos, which Oku keeps as polaroids. If you don’t know how to start, borrow a line and keep going. Missed a day? Write it under its own date.',
+    },
+    back: {
+      title: 'See where your days happened.',
+      body: 'Home shows today and, when there is one, an entry from this day in an earlier year. Stories lays your entries out on a map, on a timeline, and by the people in them.',
+      mapAlt: 'Stories, Map: entries pinned across Java and Bali, with the places listed below.',
+      onThisDay: 'a year ago today',
+      year: { meta: '6 Oct 2025', title: 'Moving day', body: 'Boxes everywhere. Ate noodles on the floor because the table hadn’t come yet.' },
+      rows: [
+        { meta: '25 Sep · Yogyakarta', title: 'Morning walk', excerpt: 'Cold air, empty streets. Coffee with Dimas by the bridge.', mood: 'Bright', person: 'Dimas', photo: hills },
+        { meta: '19 Sep · Kuta', title: 'Sunset at Kuta', excerpt: 'Nadia and I sat on the sand until the sky went orange, then grey.', mood: 'Bright', person: 'Nadia', photo: sunset },
+        { meta: '16 Sep', title: 'Long day', excerpt: 'Woke up late, missed the train, spilled coffee on the one clean shirt.', mood: 'Neutral' },
+      ],
+    },
+    felt: {
+      title: 'Notice how your days have felt.',
+      body: 'Insights shows how your days have felt over time, when you tend to write, and what your days were about, without scores or advice.',
+      note: 'no scores, no streaks',
+      label: 'Insights, with example entries: 57 entries, mostly Good over the last 30 days, written most often on Tuesdays, and Self as the most common reason.',
     },
     private: {
       title: 'It stays on your iPhone.',
@@ -58,25 +67,32 @@ const copy = {
   id: {
     lead: 'Tulis tentang harimu. Semua yang kamu tulis tetap bersamamu.',
     kanji: 'Diambil dari kanji 奥 — bagian dalam sebuah tempat yang tersembunyi.',
-    world: {
-      title: 'Lihat di mana harimu terjadi.',
-      body: 'Beranda menampilkan hari ini dan, kalau ada, catatan dari tanggal yang sama di tahun sebelumnya. Ceritaku menata catatanmu di peta, di riwayat, dan menurut orang-orang di dalamnya. Ringkasan menunjukkan perasaanmu dari waktu ke waktu, kapan kamu biasa menulis, dan apa yang mengisi hari-harimu, tanpa skor atau nasihat.',
-      map: { label: 'Ceritaku', alt: 'Ceritaku, Peta: catatan tersebar di Jawa dan Bali, dengan daftar tempat di bawahnya.' },
-      insights: { label: 'Ringkasan', alt: 'Ringkasan: jumlah catatan, dan perasaan selama 30 hari terakhir.' },
-    },
-    day: {
-      title: 'Tandai harimu dengan satu kata.',
-      body: 'Tandai perasaanmu hari itu dengan satu kata, dari Berat sampai Cerah, lalu pilih sampai tiga alasannya. Tambahkan tempat, orang-orang yang ada di sana, dan beberapa foto yang disimpan Oku sebagai polaroid.',
-      compose: { label: 'Tulis', alt: 'Menulis catatan: perasaan, alasan, orang, tempat, dan foto sudah diisi.' },
-      photos: 'Foto tersimpan seperti polaroid.',
-      captions: ['jam emas', 'jalan memutar'],
-    },
-    page: {
-      title: 'Satu baris atau satu halaman.',
-      body: 'Bingung mulai dari mana? Pinjam satu kalimat, lalu lanjutkan. Ada hari yang terlewat? Tulis di tanggalnya sendiri.',
-      today: 'Hari ini',
+    compose: {
+      title: 'Hari yang hening',
       line: 'Aku merasa tenang hari ini. Tapi jujur, rasanya agak asing untukku. Setelah sekian lama hati ini rasanya berantakan dan capek banget karena terus-terusan pura-pura kuat, hari ini mendadak semuanya hening.',
-      home: { label: 'Beranda', alt: 'Beranda: sapaan, kartu tulis hari ini, dan catatan terbaru.' },
+      note: 'satu kata untuk seluruh hari',
+    },
+    write: {
+      title: 'Satu baris atau satu halaman.',
+      body: 'Tandai perasaanmu hari itu dengan satu kata, dari Berat sampai Cerah, lalu pilih sampai tiga alasannya. Tambahkan tempat, orang-orang yang ada di sana, dan beberapa foto yang disimpan Oku sebagai polaroid. Bingung mulai dari mana? Pinjam satu kalimat, lalu lanjutkan. Ada hari yang terlewat? Tulis di tanggalnya sendiri.',
+    },
+    back: {
+      title: 'Lihat di mana harimu terjadi.',
+      body: 'Beranda menampilkan hari ini dan, kalau ada, catatan dari tanggal yang sama di tahun sebelumnya. Ceritaku menata catatanmu di peta, di riwayat, dan menurut orang-orang di dalamnya.',
+      mapAlt: 'Ceritaku, Peta: catatan tersebar di Jawa dan Bali, dengan daftar tempat di bawahnya.',
+      onThisDay: 'setahun lalu hari ini',
+      year: { meta: '6 Okt 2025', title: 'Hari pindahan', body: 'Kardus di mana-mana. Makan mi di lantai karena mejanya belum datang.' },
+      rows: [
+        { meta: '25 Sep · Yogyakarta', title: 'Jalan pagi', excerpt: 'Udara dingin, jalanan sepi. Mampir ngopi sama Dimas dekat jembatan.', mood: 'Cerah', person: 'Dimas', photo: hills },
+        { meta: '19 Sep · Kuta', title: 'Senja di Kuta', excerpt: 'Aku dan Nadia duduk di pasir sampai langit jadi oranye, lalu abu-abu.', mood: 'Cerah', person: 'Nadia', photo: sunset },
+        { meta: '16 Sep', title: 'Hari yang panjang', excerpt: 'Bangun kesiangan, ketinggalan kereta, kopi tumpah ke satu-satunya kemeja bersih.', mood: 'Tenang' },
+      ],
+    },
+    felt: {
+      title: 'Lihat bagaimana harimu terasa.',
+      body: 'Ringkasan menunjukkan perasaanmu dari waktu ke waktu, kapan kamu biasa menulis, dan apa yang mengisi hari-harimu, tanpa skor atau nasihat.',
+      note: 'tanpa skor, tanpa streak',
+      label: 'Ringkasan dengan catatan contoh: 57 catatan, kebanyakan Baik selama 30 hari terakhir, paling sering menulis di hari Selasa, dan Diri sendiri sebagai alasan terbanyak.',
     },
     private: {
       title: 'Tetap di iPhone-mu.',
@@ -104,73 +120,61 @@ const words = chrome[lang].tagline.split(' ');
   <svg class="rings" aria-hidden="true" data-rings></svg>
 
   <section class="hero" data-ring>
-    <Mark size={88} class="hero-mark" />
-    <h1>Oku</h1>
-    <p class="tagline">
-      {words.map((w, i) => <span class="word" style={`animation-delay: ${200 + i * 110}ms`}>{w}</span>)}
-    </p>
-    <p class="lead">{copy.lead}</p>
-    <p class="kanji">{copy.kanji}</p>
-  </section>
-
-  <section class="band world" data-ring>
-    <div class="text">
-      <h2>{copy.world.title}</h2>
-      <p>{copy.world.body}</p>
+    <div class="hero-text">
+      <h1>
+        {words.map((w, i) => <span class="word" style={`animation-delay: ${120 + i * 110}ms`}>{w}</span>)}
+      </h1>
+      <p class="lead">{copy.lead}</p>
+      <p class="kanji">{copy.kanji}</p>
     </div>
-    <div class="shots two">
-      <figure>
-        <Screen lang={lang} name="04-map" alt={copy.world.map.alt} />
-        <figcaption class="label">{copy.world.map.label}</figcaption>
-      </figure>
-      <figure class="lower">
-        <Screen lang={lang} name="05-insights" alt={copy.world.insights.alt} />
-        <figcaption class="label">{copy.world.insights.label}</figcaption>
-      </figure>
+    <div class="hero-sheet">
+      <ComposeSheet lang={lang} title={copy.compose.title} line={copy.compose.line} note={copy.compose.note} />
     </div>
   </section>
 
-  <section class="band day" data-ring>
-    <div class="text">
-      <h2>{copy.day.title}</h2>
-      <p>{copy.day.body}</p>
-      <div class="prints" aria-label={copy.day.photos} role="img">
-        <Polaroid src={sunset} caption={copy.day.captions[0]} tilt={-3} />
-        <Polaroid src={hills} caption={copy.day.captions[1]} tilt={2.5} class="second" />
-      </div>
-      <p class="prints-line">{copy.day.photos}</p>
-    </div>
-    <div class="shots">
-      <figure>
-        <Screen lang={lang} name="02-compose" alt={copy.day.compose.alt} />
-        <figcaption class="label">{copy.day.compose.label}</figcaption>
-      </figure>
-    </div>
+  <section class="write" data-ring>
+    <h2>{copy.write.title}</h2>
+    <p>{copy.write.body}</p>
   </section>
 
-  <section class="band page" data-ring>
-    <div class="text">
-      <h2>{copy.page.title}</h2>
-      <p>{copy.page.body}</p>
-      <div class="sheet">
-        <p class="label sheet-date">{copy.page.today}</p>
-        <p class="typed" data-typed>{copy.page.line}</p>
+  <section class="back" data-ring>
+    <div class="back-text">
+      <h2>{copy.back.title}</h2>
+      <p>{copy.back.body}</p>
+    </div>
+    <div class="back-art">
+      <Screen lang={lang} name="04-map" alt={copy.back.mapAlt} class="map" />
+      <div class="slips" aria-hidden="true">
+        <div class="slip otd">
+          <p class="label otd-label">{copy.back.onThisDay}</p>
+          <p class="otd-meta label">{copy.back.year.meta}</p>
+          <p class="otd-title">{copy.back.year.title}</p>
+          <p class="otd-body">{copy.back.year.body}</p>
+        </div>
+        <div class="slip rows">
+          {copy.back.rows.map((r) => <EntryRow {...r} />)}
+        </div>
       </div>
     </div>
-    <div class="shots">
-      <figure>
-        <Screen lang={lang} name="01-home" alt={copy.page.home.alt} />
-        <figcaption class="label">{copy.page.home.label}</figcaption>
-      </figure>
-    </div>
   </section>
 
-  <section class="dot" data-dot>
-    <div class="dot-text">
-      <h2>{copy.private.title}</h2>
-      <p>{copy.private.body}</p>
-      <p>{copy.private.maps}</p>
-      <p><a href={href(lang, 'privacy')}>{copy.private.link}</a></p>
+  <section class="felt" data-ring>
+    <div class="felt-text">
+      <h2>{copy.felt.title}</h2>
+      <p>{copy.felt.body}</p>
+      <p class="note" aria-hidden="true">{copy.felt.note}</p>
+    </div>
+    <Insights lang={lang} label={copy.felt.label} />
+  </section>
+
+  <section class="dot-wrap">
+    <div class="dot" data-dot>
+      <div class="dot-text">
+        <h2>{copy.private.title}</h2>
+        <p>{copy.private.body}</p>
+        <p>{copy.private.maps}</p>
+        <p><a href={href(lang, 'privacy')}>{copy.private.link}</a></p>
+      </div>
     </div>
   </section>
 
@@ -179,13 +183,13 @@ const words = chrome[lang].tagline.split(' ');
     <ul>
       {copy.also.items.map((item) => <li>{item}</li>)}
     </ul>
-    <p class="note">{copy.also.note}</p>
+    <p class="also-note">{copy.also.note}</p>
   </section>
 </div>
 
 <script>
-  // Rings: one hairline circle per section, all centred on the ink dot, so the page
-  // narrows inward as you read. Without this script there are no rings; nothing else changes.
+  // Rings: one hairline circle per section, all centred on the ink dot. Without this
+  // script there are no rings; nothing else changes.
   const root = document.querySelector<HTMLElement>('[data-inward]');
   const svg = root?.querySelector<SVGSVGElement>('[data-rings]');
   const dot = root?.querySelector<HTMLElement>('[data-dot]');
@@ -193,57 +197,21 @@ const words = chrome[lang].tagline.split(' ');
     const ns = 'http://www.w3.org/2000/svg';
     const draw = () => {
       const box = svg.getBoundingClientRect();
-      const d = dot.getBoundingClientRect();
-      const cx = d.left + d.width / 2 - box.left;
-      const cy = d.top + d.height / 2 - box.top;
+      const wrap = dot.parentElement!.getBoundingClientRect();
+      const cx = wrap.left + wrap.width / 2 - box.left;
+      const cy = wrap.top + wrap.height / 2 - box.top;
       svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
       svg.replaceChildren();
-      const sections = [...root.querySelectorAll<HTMLElement>('[data-ring]')];
-      for (const s of sections) {
-        const r = cy - (s.getBoundingClientRect().top - box.top) + 24;
+      for (const s of root.querySelectorAll<HTMLElement>('[data-ring]')) {
         const c = document.createElementNS(ns, 'circle');
         c.setAttribute('cx', String(cx));
         c.setAttribute('cy', String(cy));
-        c.setAttribute('r', String(r));
+        c.setAttribute('r', String(cy - (s.getBoundingClientRect().top - box.top) + 32));
         svg.append(c);
       }
     };
     draw();
     new ResizeObserver(draw).observe(root);
-    addEventListener('resize', draw);
-  }
-
-  // The caret writes the line once, when the page comes into view.
-  const typed = document.querySelector<HTMLElement>('[data-typed]');
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (typed && !still && 'IntersectionObserver' in window) {
-    const text = typed.textContent ?? '';
-    typed.setAttribute('aria-label', text);
-    const shown = document.createElement('span');
-    shown.setAttribute('aria-hidden', 'true');
-    const rest = document.createElement('span');
-    rest.className = 'unwritten';
-    rest.setAttribute('aria-hidden', 'true');
-    rest.textContent = text;
-    const caret = document.createElement('span');
-    caret.className = 'caret';
-    typed.replaceChildren(shown, caret, rest);
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      io.disconnect();
-      let i = 0;
-      const step = () => {
-        i += 1;
-        shown.textContent = text.slice(0, i);
-        rest.textContent = text.slice(i);
-        if (i >= text.length) { typed.classList.add('done'); return; }
-        const ch = text[i - 1];
-        const pause = '.!?'.includes(ch) ? 420 : ',;'.includes(ch) ? 200 : 26 + Math.random() * 34;
-        setTimeout(step, pause);
-      };
-      setTimeout(step, 500);
-    }, { threshold: 0.6 });
-    io.observe(typed);
   }
 </script>
 
@@ -253,7 +221,6 @@ const words = chrome[lang].tagline.split(' ');
     max-width: var(--page);
     margin: 0 auto;
   }
-  /* Full-bleed, so the arcs run off the page edges instead of stopping at the column. */
   .rings {
     position: absolute;
     top: 0;
@@ -263,116 +230,101 @@ const words = chrome[lang].tagline.split(' ');
     pointer-events: none;
     overflow: hidden;
   }
-  .rings :global(circle) {
-    fill: none;
-    stroke: var(--rule);
-    stroke-width: 1;
-    vector-effect: non-scaling-stroke;
-  }
+  .rings :global(circle) { fill: none; stroke: var(--rule); stroke-width: 1; vector-effect: non-scaling-stroke; }
   section { position: relative; }
 
+  h1, h2 { font-weight: 400; text-wrap: balance; margin: 0; }
   h2 {
-    font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.5rem);
-    font-weight: 400;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
-    margin: 0 0 1rem;
-    text-wrap: balance;
+    font-size: clamp(2.25rem, 1.35rem + 3.3vw, 4.25rem);
+    line-height: 1.04;
+    letter-spacing: -0.022em;
+    margin-bottom: 1.25rem;
   }
-  .text p { margin: 0 0 1rem; max-width: 30rem; text-wrap: pretty; color: var(--ink-2); }
+  p { margin: 0; text-wrap: pretty; }
 
-  /* Hero: the outermost ring. */
+  /* Hero */
   .hero {
     display: grid;
-    justify-items: center;
-    text-align: center;
-    padding: clamp(3rem, 10vh, 7rem) 0 clamp(5rem, 14vh, 9rem);
+    gap: 3rem 4rem;
+    align-items: center;
+    padding: clamp(1.5rem, 6vh, 4.5rem) 0 clamp(6rem, 14vh, 9rem);
   }
-  .hero :global(.hero-mark) { color: var(--ink); margin-bottom: 1.25rem; }
-  .hero h1 {
-    font-size: clamp(3.5rem, 2.4rem + 4.5vw, 6rem);
-    font-weight: 400;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    margin: 0 0 1.25rem;
+  @media (min-width: 64rem) {
+    .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 32rem); }
   }
-  .tagline {
-    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.125rem);
-    line-height: 1.2;
-    margin: 0 0 1rem;
-    text-wrap: balance;
+  h1 {
+    font-size: clamp(3rem, 1.6rem + 5vw, 6rem);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.75rem;
   }
-  .word {
-    display: inline-block;
-    margin-right: 0.25em;
-    animation: bloom 320ms ease-out both;
-  }
+  .word { display: inline-block; margin-right: 0.22em; animation: bloom 420ms ease-out both; }
   .word:last-child { margin-right: 0; }
-  .lead { color: var(--ink-2); margin: 0 0 2.5rem; max-width: 26rem; text-wrap: balance; }
-  .kanji { font-size: 0.9375rem; color: var(--ink-2); margin: 0; max-width: 24rem; text-wrap: balance; }
+  .lead { font-size: clamp(1.1875rem, 1.05rem + 0.5vw, 1.4375rem); line-height: 1.4; max-width: 26rem; margin-bottom: 1.5rem; }
+  .kanji { font-size: 0.9375rem; color: var(--ink-2); max-width: 22rem; }
+  .hero-sheet { padding-bottom: 4rem; }
 
-  /* Bands: text beside the app. */
-  .band {
+  /* An editorial beat between the busy hero and the look back */
+  .write {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: clamp(5rem, 14vh, 9rem) 0;
+    text-align: center;
+  }
+  .write p {
+    font-size: clamp(1.1875rem, 1rem + 0.7vw, 1.5rem);
+    line-height: 1.5;
+  }
+
+  /* Look back: the one real screen, with slips laid against it */
+  .back {
     display: grid;
-    gap: 2.5rem;
-    padding-block: clamp(4rem, 12vh, 8rem);
+    gap: 3rem;
+    padding: clamp(5rem, 12vh, 8rem) 0;
   }
-  @media (min-width: 52rem) {
-    .band { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 4rem; }
+  .back-text p, .felt-text p { font-size: 1.1875rem; line-height: 1.5; max-width: 32rem; }
+  .back-art { display: grid; gap: 1.5rem; justify-items: center; }
+  .back-art :global(.map) { width: min(19rem, 78vw); }
+  .slips { display: grid; gap: 1rem; width: min(100%, 26rem); }
+  .slip { background: var(--paper-raised); border-radius: 2px; padding: 1rem 1.125rem; }
+  .otd { box-shadow: var(--shadow-print); }
+  .otd-label { color: var(--teak); margin-bottom: 0.75rem; }
+  .otd-meta { color: var(--ink-2); margin-bottom: 0.4rem; font-size: 0.6875rem; }
+  .otd-title { font-size: 1.375rem; line-height: 1.2; margin-bottom: 0.25rem; }
+  .otd-body { font-size: 0.9375rem; color: var(--ink-2); }
+  .rows { padding-block: 0.25rem; }
+  .rows :global(.row:last-child) { border-bottom: 0; }
+  @media (min-width: 64rem) {
+    .back { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); align-items: center; gap: 4rem; }
+    /* Slips laid against the phone's left edge, overlapping it a little. */
+    .back-art { grid-template-columns: minmax(0, 1fr) auto; align-items: end; justify-items: stretch; gap: 0; }
+    .slips { grid-area: 1 / 1; position: relative; z-index: 1; width: auto; margin: 0 -2.5rem 3rem 0; rotate: -1.5deg; }
+    .back-art :global(.map) { grid-area: 1 / 2; width: 17.5rem; }
   }
 
-  figure { margin: 0; }
-  figcaption.label { color: var(--ink-2); margin-top: 1rem; text-align: center; }
-  .shots { display: flex; justify-content: center; gap: 1.5rem; }
-  .shots figure { width: min(18rem, 72vw); }
-  .shots.two figure { width: min(16rem, 44vw); }
-  .shots.two .lower { margin-top: 4rem; }
+  /* How the days felt */
+  .felt { padding: clamp(5rem, 12vh, 8rem) 0; display: grid; gap: 2.5rem; }
+  .felt-text { position: relative; }
+  .note {
+    font-family: var(--hand);
+    font-size: 1.375rem;
+    color: var(--teak);
+    rotate: -3deg;
+    margin-top: 1rem;
+  }
+  @media (min-width: 64rem) {
+    .felt-text { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 0 4rem; align-items: end; }
+    .felt-text h2 { grid-row: span 2; margin: 0; }
+    .note { justify-self: start; }
+  }
 
-  .prints {
-    position: relative;
-    height: 17rem;
-    margin: 2rem 0 0.5rem;
-  }
-  .prints :global(.polaroid) { position: absolute; left: 0; top: 0; width: min(12rem, 46%); }
-  .prints :global(.polaroid.second) { left: min(11rem, 44%); top: 1.75rem; }
-  .prints-line { font-size: 0.9375rem; }
-
-  /* The page: Compose's dot grid, the teak caret. */
-  .sheet {
-    margin-top: 2rem;
-    padding: 1.5rem 1.25rem 2rem;
-    background-color: var(--paper-raised);
-    background-image: radial-gradient(circle, color-mix(in srgb, var(--ink-3) 35%, transparent) 0.75px, transparent 1px);
-    background-size: 20px 20px;
-    max-width: 30rem;
-  }
-  .sheet-date { color: var(--ink-2); margin: 0 0 1rem; }
-  .typed {
-    font-size: 1.1875rem;
-    line-height: 1.55;
-    color: var(--ink);
-    margin: 0;
-    min-height: 7.5em;
-  }
-  .typed :global(.unwritten) { visibility: hidden; }
-  .typed :global(.caret) {
-    display: inline-block;
-    width: 2px;
-    height: 1.2em;
-    margin: 0 1px -0.2em;
-    background: var(--teak);
-    animation: blink 1s steps(1) infinite;
-  }
-  .typed:global(.done) :global(.caret) { animation-duration: 1.2s; }
-  @keyframes blink { 50% { opacity: 0; } }
-
-  /* The ink dot: the private place at the centre. */
+  /* The ink dot: the private place at the centre. It grows as you reach it. */
+  .dot-wrap { padding: clamp(3rem, 8vh, 6rem) 0; }
   .dot {
     width: max(150vw, 38rem);
-    max-width: 48rem;
+    max-width: 52rem;
     aspect-ratio: 1;
-    /* Centred even when wider than the column (phones): */
-    margin: clamp(3rem, 8vh, 6rem) 0 clamp(3rem, 8vh, 6rem) 50%;
+    margin-left: 50%;
     translate: -50% 0;
     display: grid;
     place-items: center;
@@ -382,21 +334,25 @@ const words = chrome[lang].tagline.split(' ');
     text-align: center;
   }
   .dot-text { width: min(30rem, 82vw); }
-  .dot h2 { color: var(--paper); }
-  .dot p { margin: 0 0 1rem; text-wrap: pretty; }
+  .dot h2 { color: var(--paper); font-size: clamp(2rem, 1.4rem + 2.2vw, 3.25rem); }
+  .dot p { margin-bottom: 1rem; font-size: 1.0625rem; }
   .dot a { text-decoration-color: currentColor; }
   .dot ::selection { background: var(--paper); color: var(--ink); }
   .dot :focus-visible { outline-color: var(--paper); }
-
-  /* Back out on the paper. */
-  .also {
-    max-width: 34rem;
-    margin: 0 auto;
-    padding: 2rem 0 4rem;
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .dot { animation: grow linear both; animation-timeline: view(); animation-range: entry 0% cover 45%; }
+      .dot-text { animation: arrive linear both; animation-timeline: view(); animation-range: entry 60% cover 50%; }
+    }
   }
-  .also h2 { font-size: 1.375rem; margin-bottom: 1rem; }
+  @keyframes grow { from { scale: 0.06; } }
+  @keyframes arrive { from { opacity: 0; filter: blur(4px); } }
+
+  /* Back out on the paper */
+  .also { max-width: 36rem; margin: 0 auto; padding: 2rem 0 4rem; }
+  .also h2 { font-size: 1.625rem; margin-bottom: 1rem; }
   .also ul { margin: 0 0 1.5rem; padding: 0; list-style: none; }
-  .also li { padding: 0.75rem 0; border-bottom: var(--hairline) solid var(--rule); }
+  .also li { padding: 0.8rem 0; border-bottom: var(--hairline) solid var(--rule); }
   .also li:first-child { border-top: var(--hairline) solid var(--rule); }
-  .note { font-size: 0.9375rem; color: var(--ink-2); margin: 0; }
+  .also-note { font-size: 0.9375rem; color: var(--ink-2); }
 </style>

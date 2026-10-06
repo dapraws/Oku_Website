@@ -1,0 +1,58 @@
+---
+// Home's entry row: small polaroid, mono date and place, serif title and excerpt, mood and people.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  photo?: ImageMetadata;
+  meta: string;
+  title: string;
+  excerpt: string;
+  mood: string;
+  person?: string;
+}
+const { photo, meta, title, excerpt, mood, person } = Astro.props;
+---
+<div class="row">
+  <div class:list={['print', { empty: !photo }]}>
+    {photo && <Image src={photo} alt="" width={112} height={112} />}
+  </div>
+  <div class="body">
+    <p class="meta">{meta}</p>
+    <p class="title">{title}</p>
+    <p class="excerpt">{excerpt}</p>
+    <p class="tags">
+      <span class="mood"><i></i>{mood}</span>
+      {person && <span class="person"><Icon name="users" size={13} />{person}</span>}
+    </p>
+  </div>
+</div>
+
+<style>
+  .row {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    gap: 0.875rem;
+    padding: 0.875rem 0;
+    border-bottom: var(--hairline) solid var(--rule);
+  }
+  /* polaroid-small: 4px sides and top, 20px band, no shadow */
+  .print {
+    width: 4rem;
+    height: 5rem;
+    padding: 4px 4px 20px;
+    background: var(--polaroid-frame);
+    border-radius: 2px;
+  }
+  .print.empty { background: var(--paper-sunken); }
+  .print img { width: 100%; height: 100%; object-fit: cover; box-shadow: 0 0 0 0.5px var(--polaroid-hairline); }
+  .body { min-width: 0; }
+  p { margin: 0; }
+  .meta { font: 500 0.6875rem/1 var(--mono); letter-spacing: 0.098em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 0.375rem; }
+  .title { font-size: 1.25rem; line-height: 1.2; margin-bottom: 0.25rem; }
+  .excerpt { font-size: 0.9375rem; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.5rem; }
+  .tags { display: flex; gap: 0.875rem; font-size: 0.8125rem; color: var(--ink-2); }
+  .tags span { display: inline-flex; align-items: center; gap: 0.3rem; }
+  .mood i { width: 5px; height: 5px; border-radius: 50%; background: var(--teak); }
+</style>

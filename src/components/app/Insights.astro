@@ -1,0 +1,281 @@
+---
+// Oku's Insights, rebuilt from DESIGN.md with example data: stat cards, the mood line with its
+// teak wash, the 12-week rhythm grid and the why doughnut. Draws in once when it scrolls into view.
+import Icon from './Icon.astro';
+
+interface Props { lang: 'en' | 'id'; label: string }
+const { lang, label } = Astro.props;
+
+const t = {
+  en: {
+    stats: ['entries', 'this week', 'days this month'],
+    mood: 'mood over time', frames: ['30 days', '90 days', 'all time'],
+    mostly: 'Mostly Good', across: 'across 16 days',
+    levels: ['Bright', 'Good', 'Neutral', 'Sad', 'Heavy'],
+    dates: ['8 Sep', '22 Sep', '6 Oct'],
+    rhythm: 'rhythm · last 12 weeks', days: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+    months: ['Jul', 'Aug', 'Sep', 'Oct'], peak: 'Most often on Tuesday.',
+    why: 'why · 30 days',
+    reasons: ['Self', 'Friends', 'Health', 'Work', 'School'],
+  },
+  id: {
+    stats: ['catatan', 'minggu ini', 'hari bulan ini'],
+    mood: 'suasana hati', frames: ['30 hari', '90 hari', 'sepanjang waktu'],
+    mostly: 'Kebanyakan Baik', across: 'dari 16 hari',
+    levels: ['Cerah', 'Baik', 'Tenang', 'Sedih', 'Berat'],
+    dates: ['8 Sep', '22 Sep', '6 Okt'],
+    rhythm: 'ritme · 12 minggu terakhir', days: ['S', 'S', 'R', 'K', 'J', 'S', 'M'],
+    months: ['Jul', 'Agu', 'Sep', 'Okt'], peak: 'Paling sering di hari Selasa.',
+    why: 'alasan · 30 hari',
+    reasons: ['Diri sendiri', 'Teman', 'Kesehatan', 'Kerja', 'Sekolah'],
+  },
+}[lang];
+
+// Mood: 16 entry days across 30 days, 1 (Heavy) to 5 (Bright). Mostly Good.
+const days = [0, 2, 3, 5, 7, 8, 10, 12, 14, 16, 18, 20, 22, 25, 27, 29];
+const mood = [5, 1, 4, 3, 4, 2, 4, 5, 2, 4, 5, 3, 4, 4, 3, 5];
+const W = 560, H = 210, L = 6, R = 96, T = 10, B = 30;
+const x = (d: number) => L + (d / 29) * (W - L - R);
+const y = (m: number) => T + ((5 - m) / 4) * (H - T - B);
+const pts = days.map((d, i) => [x(d), y(mood[i])] as const);
+
+// Monotone cubic (Fritsch–Carlson), like Swift Charts' .monotone.
+function monotone(p: readonly (readonly [number, number])[]) {
+  const n = p.length, dx: number[] = [], m: number[] = [], tan: number[] = [];
+  for (let i = 0; i < n - 1; i++) { dx[i] = p[i + 1][0] - p[i][0]; m[i] = (p[i + 1][1] - p[i][1]) / dx[i]; }
+  tan[0] = m[0]; tan[n - 1] = m[n - 2];
+  for (let i = 1; i < n - 1; i++) tan[i] = m[i - 1] * m[i] <= 0 ? 0 : (3 * (dx[i - 1] + dx[i])) / ((2 * dx[i] + dx[i - 1]) / m[i - 1] + (dx[i] + 2 * dx[i - 1]) / m[i]);
+  let d = `M${p[0][0].toFixed(1)},${p[0][1].toFixed(1)}`;
+  for (let i = 0; i < n - 1; i++) {
+    const h = dx[i] / 3;
+    d += ` C${(p[i][0] + h).toFixed(1)},${(p[i][1] + h * tan[i]).toFixed(1)} ${(p[i + 1][0] - h).toFixed(1)},${(p[i + 1][1] - h * tan[i + 1]).toFixed(1)} ${p[i + 1][0].toFixed(1)},${p[i + 1][1].toFixed(1)}`;
+  }
+  return d;
+}
+const line = monotone(pts);
+const base = y(0.6);
+const area = `${line} L${pts.at(-1)![0].toFixed(1)},${base} L${pts[0][0].toFixed(1)},${base} Z`;
+const last = pts.at(-1)!;
+
+// Rhythm: 12 weeks x 7 days, Monday first; Tuesdays busiest. Deterministic example data.
+let seed = 7;
+const rand = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+const grid = Array.from({ length: 12 }, (_, w) =>
+  Array.from({ length: 7 }, (_, d) => {
+    if (w === 11 && d > 1) return -1; // after today
+    const r = rand() + (d === 1 ? 0.45 : 0) - (d >= 5 ? 0.15 : 0);
+    return r > 1.05 ? 2 : r > 0.55 ? 1 : 0;
+  }),
+);
+const weekdayTotals = t.days.map((_, d) => grid.reduce((s, w) => s + Math.max(0, w[d]), 0));
+const peakDay = weekdayTotals.indexOf(Math.max(...weekdayTotals));
+
+// Why: counts per reason; top reason teak, the rest ink at falling opacity (25% minimum).
+const counts = [5, 4, 3, 2, 2];
+const total = counts.reduce((a, b) => a + b, 0);
+const opac = [1, 0.8, 0.6, 0.4, 0.25];
+const arc = (a0: number, a1: number, r0: number, r1: number) => {
+  const p = (a: number, r: number) => `${(68 + r * Math.sin(a)).toFixed(2)},${(68 - r * Math.cos(a)).toFixed(2)}`;
+  const big = a1 - a0 > Math.PI ? 1 : 0;
+  return `M${p(a0, r1)} A${r1},${r1} 0 ${big} 1 ${p(a1, r1)} L${p(a1, r0)} A${r0},${r0} 0 ${big} 0 ${p(a0, r0)} Z`;
+};
+let acc = 0;
+const slices = counts.map((c, i) => {
+  const a0 = (acc / total) * Math.PI * 2 + 0.015, a1 = ((acc + c) / total) * Math.PI * 2 - 0.015;
+  acc += c;
+  return { d: arc(a0, a1, 42, 66), top: i === 0, o: opac[i] };
+});
+const stats = [{ n: 57, icon: 'notebook' }, { n: 5, icon: 'calendarDots' }, { n: 4, icon: 'calendarCheck' }] as const;
+---
+<div class="insights" data-insights role="img" aria-label={label}>
+  <div class="stats" aria-hidden="true">
+    {stats.map((s, i) => (
+      <div class="stat">
+        <Icon name={s.icon} size={22} />
+        <span class="num" data-count={s.n}>{s.n}</span>
+        <span class="label">{t.stats[i]}</span>
+      </div>
+    ))}
+  </div>
+
+  <div class="panel mood" aria-hidden="true">
+    <p class="label">{t.mood}</p>
+    <div class="frames">
+      {t.frames.map((f, i) => <span class:list={['label', 'frame', { on: i === 0 }]}>{f}</span>)}
+    </div>
+    <p class="summary"><span>{t.mostly}</span> {t.across}</p>
+    <svg class="chart" viewBox={`0 0 ${W} ${H}`}>
+      <defs>
+        <linearGradient id={`wash-${lang}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--teak)" stop-opacity="0.22" />
+          <stop offset="1" stop-color="var(--teak)" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      {t.levels.map((lv, i) => (
+        <text class="axis" x={W - R + 12} y={y(5 - i) + 3.5}>{lv.toUpperCase()}</text>
+      ))}
+      <line class="neutral" x1={L} x2={W - R} y1={y(3)} y2={y(3)} />
+      <path class="wash" d={area} fill={`url(#wash-${lang})`} />
+      <path class="line" d={line} pathLength="1" />
+      {pts.map(([px, py]) => <circle class="pt" cx={px} cy={py} r="3" />)}
+      <circle class="latest" cx={last[0]} cy={last[1]} r="5.5" />
+      {t.dates.map((d, i) => (
+        <text class="axis" x={[L, (L + W - R) / 2, W - R][i]} y={H - 6} text-anchor={['start', 'middle', 'end'][i]}>{d.toUpperCase()}</text>
+      ))}
+    </svg>
+  </div>
+
+  <div class="panel rhythm" aria-hidden="true">
+    <p class="label">{t.rhythm}</p>
+    <div class="grid months">
+      {t.months.map((m, i) => <span class="month label" style={`grid-column: ${2 + [0, 3, 7, 11][i]} `}>{m}</span>)}
+    </div>
+    <div class="grid">
+      {t.days.map((d, di) => (
+        <>
+          <span class:list={['day', 'label', { peak: di === peakDay }]}>{d}</span>
+          {grid.map((week, wi) => (
+            <i class:list={['cell', `c${week[di]}`, { today: wi === 11 && di === 1 }]} style={`--n: ${wi * 7 + di}`}></i>
+          ))}
+        </>
+      ))}
+    </div>
+    <p class="peakline">{t.peak}</p>
+  </div>
+
+  <div class="panel why" aria-hidden="true">
+    <p class="label">{t.why}</p>
+    <div class="why-body">
+      <svg viewBox="0 0 136 136" class="doughnut">
+        {slices.map((s, i) => <path d={s.d} class:list={{ top: s.top }} style={`--o: ${s.o}; --i: ${i}`} />)}
+      </svg>
+      <ul>
+        {t.reasons.map((r, i) => (
+          <li><i style={`--o: ${opac[i]}`} class:list={{ top: i === 0 }}></i>{r}<span>{counts[i]}</span></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-insights]');
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (root && !still && 'IntersectionObserver' in window) {
+    root.classList.add('waiting');
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      root.classList.remove('waiting');
+      root.classList.add('drawn');
+      // Stat numbers count up, as in the app.
+      for (const el of root.querySelectorAll<HTMLElement>('[data-count]')) {
+        const end = Number(el.dataset.count);
+        const t0 = performance.now();
+        const tick = (now: number) => {
+          const k = Math.min(1, (now - t0) / 900);
+          el.textContent = String(Math.round(end * (1 - Math.pow(1 - k, 3))));
+          if (k < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+    }, { threshold: 0.35 });
+    io.observe(root);
+  }
+</script>
+
+<style>
+  .insights {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 52rem) {
+    .insights {
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      grid-template-areas: 'stats stats' 'mood rhythm' 'mood why';
+    }
+    .stats { grid-area: stats; }
+    .mood { grid-area: mood; }
+    .rhythm { grid-area: rhythm; }
+    .why { grid-area: why; }
+  }
+  p { margin: 0; }
+  .label { color: var(--ink-2); }
+
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
+  .stat {
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+    padding: 1rem;
+    background: var(--paper-raised);
+    border-radius: 2px;
+    color: var(--ink-2);
+  }
+  .num { font-size: clamp(2rem, 1.6rem + 1.4vw, 2.75rem); line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .stat .label { line-height: 1.3; }
+
+  .panel {
+    padding: 1.25rem;
+    background: var(--paper-raised);
+    border-radius: 2px;
+  }
+  .panel > .label { margin-bottom: 0.875rem; }
+  .frames { display: flex; gap: 0.375rem; margin-bottom: 1rem; }
+  .frame { padding: 0.5rem 0.625rem; border: var(--hairline) solid var(--rule); border-radius: 2px; font-size: 0.6875rem; }
+  .frame.on { background: var(--paper); color: var(--ink); border-color: var(--teak); }
+  .summary { font-size: 0.9375rem; color: var(--ink-2); margin-bottom: 0.75rem; }
+  .summary span { font-size: 1.375rem; color: var(--ink); }
+
+  .chart { width: 100%; height: auto; overflow: visible; }
+  .axis { font: 500 12px var(--mono); letter-spacing: 0.08em; fill: var(--ink-3); }
+  .neutral { stroke: var(--ink-3); stroke-width: 0.5; stroke-dasharray: 4 4; }
+  .line { fill: none; stroke: var(--teak); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pt { fill: var(--teak); }
+  .latest { fill: var(--paper); stroke: var(--teak); stroke-width: 2.5; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1rem repeat(12, minmax(0, 1fr));
+    gap: 3px;
+    align-items: center;
+  }
+  .months { margin-bottom: 4px; }
+  .month { font-size: 0.625rem; white-space: nowrap; }
+  .day { font-size: 0.625rem; color: var(--ink-3); }
+  .day.peak { color: var(--teak); }
+  .cell { aspect-ratio: 1; border-radius: 2px; background: color-mix(in srgb, var(--rule) 60%, transparent); }
+  .cell.c1 { background: color-mix(in srgb, var(--teak) 55%, transparent); }
+  .cell.c2 { background: var(--teak); }
+  .cell.c-1 { background: transparent; }
+  .cell.today { box-shadow: inset 0 0 0 1px var(--ink); }
+  .peakline { font-size: 0.9375rem; color: var(--ink-2); margin-top: 0.875rem; }
+
+  .why-body { display: flex; align-items: center; gap: 1.25rem; }
+  .doughnut { width: 7.5rem; flex: none; }
+  .doughnut path { fill: var(--ink); opacity: var(--o); }
+  .doughnut path.top { fill: var(--teak); opacity: 1; }
+  ul { list-style: none; margin: 0; padding: 0; flex: 1; font-size: 0.9375rem; }
+  li { display: flex; align-items: center; gap: 0.5rem; padding: 0.15rem 0; }
+  li i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); opacity: var(--o); }
+  li i.top { background: var(--teak); opacity: 1; }
+  li span { margin-left: auto; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+  /* Draw-in, only when the script is waiting for the panel to appear. */
+  .drawn .line { animation: draw 1100ms var(--ease) both; stroke-dasharray: 1; }
+  .waiting .line { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .waiting .wash, .waiting .pt, .waiting .latest { opacity: 0; }
+  .drawn .wash, .drawn .pt, .drawn .latest { animation: fade 500ms ease-out 700ms both; }
+  .waiting .cell { scale: 0.4; opacity: 0; }
+  .drawn .cell { animation: cell 260ms var(--ease) both; animation-delay: calc(var(--n) * 6ms + 200ms); }
+  .waiting .doughnut path { opacity: 0; }
+  .drawn .doughnut path { animation: slice 400ms ease-out both; animation-delay: calc(var(--i) * 90ms + 300ms); }
+  @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes fade { from { opacity: 0; } }
+  @keyframes cell { from { scale: 0.4; opacity: 0; } }
+  @keyframes slice { from { opacity: 0; } }
+  .drawn .doughnut path { animation-name: slice-to; }
+  @keyframes slice-to { from { opacity: 0; } to { opacity: var(--o); } }
+  .drawn .doughnut path.top { animation-name: fade; }
+</style>
