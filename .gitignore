@@ -1,0 +1,17 @@
+# build
+node_modules/
+dist/
+.astro/
+
+# macOS
+.DS_Store
+
+# raw App Store captures; the site uses converted copies in src/assets
+screenshots/
+
+# AI tooling, local only
+CLAUDE.md
+AGENTS.md
+HANDOFF.md
+.claude/
+.impeccable/

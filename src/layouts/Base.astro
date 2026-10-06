@@ -1,0 +1,140 @@
+---
+import '../styles/global.css';
+import Mark from '../components/Mark.astro';
+import { chrome, href, type Lang, type Page } from '../i18n';
+
+interface Props {
+  lang: Lang;
+  page: Page;
+  title: string;
+  description: string;
+}
+const { lang, page, title, description } = Astro.props;
+const t = chrome[lang];
+const other = t.other;
+const canonical = new URL(href(lang, page), Astro.site);
+const alternates = (['en', 'id'] as const).map((l) => ({ l, url: new URL(href(l, page), Astro.site) }));
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {alternates.map(({ l, url }) => <link rel="alternate" hreflang={l} href={url} />)}
+    <link rel="alternate" hreflang="x-default" href={new URL(href('en', page), Astro.site)} />
+    <meta name="theme-color" content="#E8E3D3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#161412" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={lang === 'en' ? 'en_US' : 'id_ID'} />
+  </head>
+  <body>
+    <a class="skip label" href="#main">{t.skip}</a>
+    <header class="site-header">
+      <a class="brand" href={href(lang, '')} aria-label={t.home}>
+        <Mark size={28} />
+        <span class="wordmark" aria-hidden="true">Oku</span>
+      </a>
+      <nav class="nav">
+        <a class="label" href={href(lang, 'support')} aria-current={page === 'support' ? 'page' : undefined}>{t.support}</a>
+        <a class="label" href={href(other, page)} hreflang={other} lang={other}>{t.otherName}</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <nav class="footer-links">
+        <a href={href(lang, 'privacy')} aria-current={page === 'privacy' ? 'page' : undefined}>{t.privacy}</a>
+        <a href={href(lang, 'terms')} aria-current={page === 'terms' ? 'page' : undefined}>{t.terms}</a>
+        <a href={href(lang, 'support')} aria-current={page === 'support' ? 'page' : undefined}>{t.support}</a>
+      </nav>
+      <p class="label">{t.copyright}</p>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header,
+  .site-footer {
+    width: 100%;
+    max-width: var(--page);
+    margin: 0 auto;
+    padding-inline: var(--gutter);
+  }
+
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 4.5rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .wordmark { font-size: 1.375rem; line-height: 1; }
+
+  .nav { display: flex; gap: 1.5rem; }
+  .nav a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink-2);
+    text-decoration: none;
+    transition: color 200ms ease-out;
+  }
+  .nav a:hover { color: var(--ink); }
+  /* The tab bar's teak strip marks the page you are on. */
+  .nav a[aria-current='page'] { color: var(--ink); }
+  .nav a[aria-current='page']::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 0;
+    width: 16px;
+    height: 2px;
+    background: var(--teak);
+  }
+
+  main { flex: 1; padding: 2rem var(--gutter) 4rem; }
+
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    padding-block: 1.5rem 2.5rem;
+    border-top: var(--hairline) solid var(--rule);
+  }
+  .footer-links { display: flex; flex-wrap: wrap; gap: 0 1.5rem; }
+  .footer-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.9375rem;
+    color: var(--ink-2);
+  }
+  .footer-links a[aria-current='page'] { color: var(--ink); text-decoration-color: var(--teak); }
+  .site-footer p { margin: 0; color: var(--ink-2); }
+
+  @media (max-width: 30rem) {
+    .site-footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
