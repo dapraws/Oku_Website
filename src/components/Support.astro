@@ -1,0 +1,75 @@
+---
+import faq from '../generated/faq.json';
+import { contactEmail, type Lang } from '../i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+
+const mailto = `mailto:${contactEmail}?subject=${encodeURIComponent('Oku')}`;
+
+const copy = {
+  en: {
+    title: 'Support',
+    lead: 'Questions, a problem, or an idea for Oku? Write to',
+    faq: 'Common questions',
+    report: 'Reporting a problem',
+    reportLead: 'It helps to include:',
+    checklist: [
+      'what you did, and what happened instead',
+      'your iPhone model and iOS version (Settings › General › About)',
+      'the Oku version, shown at the bottom of Oku’s Settings',
+      'the app language, and whether iCloud sync is on',
+      'a screenshot or screen recording, if you can',
+    ],
+    privacyNote: 'There is no need to send what you wrote in your entries, unless the problem is in the text itself.',
+  },
+  id: {
+    title: 'Bantuan',
+    lead: 'Ada pertanyaan, masalah, atau ide untuk Oku? Tulis ke',
+    faq: 'Yang sering ditanya',
+    report: 'Melaporkan masalah',
+    reportLead: 'Sebaiknya sertakan:',
+    checklist: [
+      'apa yang kamu lakukan, dan apa yang terjadi',
+      'model iPhone dan versi iOS (Pengaturan › Umum › Mengenai)',
+      'versi Oku, ada di bagian bawah Pengaturan Oku',
+      'bahasa aplikasi, dan apakah sinkronisasi iCloud menyala',
+      'screenshot atau rekaman layar, kalau bisa',
+    ],
+    privacyNote: 'Isi catatanmu tidak perlu dikirim, kecuali masalahnya ada di tulisan itu sendiri.',
+  },
+}[lang];
+---
+<article class="prose">
+  <h1 class="bloom">{copy.title}</h1>
+  <p class="lead">{copy.lead} <a href={mailto}>{contactEmail}</a>.</p>
+
+  <h2>{copy.faq}</h2>
+  {faq[lang].map(({ q, a }) => (
+    <section class="qa">
+      <h3>{q}</h3>
+      <p>{a}</p>
+    </section>
+  ))}
+
+  <h2 id="report">{copy.report}</h2>
+  <p>{copy.reportLead}</p>
+  <ul>
+    {copy.checklist.map((item) => <li>{item}</li>)}
+  </ul>
+  <p class="note">{copy.privacyNote}</p>
+</article>
+
+<style>
+  /* Support has no date line; the lead takes its place under the title. */
+  .prose h1 + .lead {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink);
+    line-height: 1.45;
+  }
+  .qa h3 { margin-top: 1.5rem; }
+  .note { color: var(--ink-2); }
+</style>

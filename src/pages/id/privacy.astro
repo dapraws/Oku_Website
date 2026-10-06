@@ -1,0 +1,9 @@
+---
+import Base from '../../layouts/Base.astro';
+import { Content } from '../../generated/privacy.id.md';
+import { legal } from '../../i18n';
+const t = legal.id.privacy;
+---
+<Base lang="id" page="privacy" title={t.title} description={t.description}>
+  <article class="prose bloom"><Content /></article>
+</Base>

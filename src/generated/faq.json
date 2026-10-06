@@ -1,0 +1,62 @@
+{
+  "en": [
+    {
+      "q": "Does Oku sync between devices?",
+      "a": "Only if you turn on iCloud sync in Settings. Sync uses your own iCloud, and takes effect the next time you open Oku."
+    },
+    {
+      "q": "Is my journal private?",
+      "a": "Yes. Oku has no accounts, no servers, and no analytics. Entries stay on your device unless you turn on iCloud sync, and then they go to your own iCloud, where we can't read them."
+    },
+    {
+      "q": "Can I search my entries?",
+      "a": "Not yet. Search is coming in a later update."
+    },
+    {
+      "q": "Can I export my journal?",
+      "a": "Export is coming in a later update. For now, iCloud sync is the way to keep a copy safe."
+    },
+    {
+      "q": "What does the AI polish do?",
+      "a": "Oku can suggest a title for an entry, or gently rewrite the body. All of this happens on your device using Apple's Foundation Models. Nothing is sent to a network."
+    },
+    {
+      "q": "Why does Oku ask for location, contact, and microphone access?",
+      "a": "Each is used for its own feature — remembering a place, adding people, turning a spoken note into text. Photos need no permission: you pick them with Apple's photo picker. You can decline any of them and keep writing."
+    },
+    {
+      "q": "What happens if I turn iCloud sync on and then off?",
+      "a": "Sync takes effect at next launch either way. When you turn it off, entries stay on the device and stop being written to your iCloud database."
+    }
+  ],
+  "id": [
+    {
+      "q": "Apakah Oku sinkron antar perangkat?",
+      "a": "Hanya kalau kamu menyalakan sinkronisasi iCloud di Pengaturan. Sinkronisasi memakai iCloud-mu sendiri, dan berlaku saat kamu buka Oku berikutnya."
+    },
+    {
+      "q": "Apakah jurnalku pribadi?",
+      "a": "Ya. Oku tidak punya akun, server, atau analitik. Catatan tinggal di perangkatmu kecuali kamu nyalakan sinkronisasi iCloud, dan kalau dinyalakan pun catatan masuk ke iCloud-mu sendiri, yang tidak bisa kami baca."
+    },
+    {
+      "q": "Bisa mencari catatan?",
+      "a": "Belum. Pencarian akan hadir di pembaruan berikutnya."
+    },
+    {
+      "q": "Bisa mengekspor jurnalku?",
+      "a": "Ekspor akan hadir di pembaruan berikutnya. Untuk saat ini, sinkronisasi iCloud adalah cara menjaga salinan tetap aman."
+    },
+    {
+      "q": "Apa fungsi penyuntingan AI?",
+      "a": "Oku bisa mengusulkan judul untuk catatan, atau merapikan isi tulisan. Semuanya berjalan di perangkatmu menggunakan Foundation Models bawaan Apple. Tidak ada yang dikirim ke jaringan."
+    },
+    {
+      "q": "Kenapa Oku minta akses lokasi, kontak, dan mikrofon?",
+      "a": "Masing-masing dipakai untuk fitur sendiri — mencatat tempat, menambahkan orang, mengubah suara jadi teks. Foto tidak butuh izin: kamu memilihnya lewat pemilih foto Apple. Kamu boleh menolak semuanya dan tetap menulis."
+    },
+    {
+      "q": "Kalau sinkronisasi iCloud dinyalakan lalu dimatikan lagi, apa yang terjadi?",
+      "a": "Sinkronisasi berlaku saat peluncuran berikutnya, baik saat menyalakan maupun mematikan. Setelah dimatikan, catatan tinggal di perangkat dan berhenti ditulis ke database iCloud-mu."
+    }
+  ]
+}

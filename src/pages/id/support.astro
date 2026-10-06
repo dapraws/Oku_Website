@@ -1,0 +1,9 @@
+---
+import Base from '../../layouts/Base.astro';
+import Support from '../../components/Support.astro';
+import { legal } from '../../i18n';
+const t = legal.id.support;
+---
+<Base lang="id" page="support" title={t.title} description={t.description}>
+  <Support lang="id" />
+</Base>

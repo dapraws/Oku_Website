@@ -1,0 +1,9 @@
+---
+import Base from '../layouts/Base.astro';
+import { Content } from '../generated/terms.en.md';
+import { legal } from '../i18n';
+const t = legal.en.terms;
+---
+<Base lang="en" page="terms" title={t.title} description={t.description}>
+  <article class="prose bloom"><Content /></article>
+</Base>
