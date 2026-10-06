@@ -1,0 +1,38 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+interface Props { src: ImageMetadata; caption: string; tilt?: number; class?: string }
+const { src, caption, tilt = 0, class: className } = Astro.props;
+---
+<figure class:list={['polaroid', className]} style={`--tilt: ${tilt}deg`}>
+  <Image src={src} alt="" widths={[240, 480]} sizes="15rem" loading="lazy" />
+  <figcaption>{caption}</figcaption>
+</figure>
+
+<style>
+  /* DESIGN.md polaroid-large: 12px sides and top, 40px caption band, Print shadow. */
+  .polaroid {
+    width: 15rem;
+    margin: 0;
+    padding: 0.75rem 0.75rem 0;
+    background: var(--polaroid-frame);
+    border-radius: 2px;
+    box-shadow: var(--shadow-print);
+    rotate: var(--tilt);
+  }
+  .polaroid img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    box-shadow: 0 0 0 0.5px var(--polaroid-hairline);
+  }
+  figcaption {
+    height: 2.5rem;
+    display: grid;
+    place-items: center;
+    font-family: 'Bradley Hand', 'Bradley Hand ITC', cursive;
+    font-weight: 700;
+    font-size: 1.0625rem;
+    color: var(--polaroid-ink);
+  }
+</style>

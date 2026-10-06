@@ -24,7 +24,7 @@ export const chrome = {
     terms: 'Ketentuan',
     support: 'Bantuan',
     copyright: '© 2026 Muhammad Darrel Prawira',
-    tagline: 'Tempat tenang untuk harimu.',
+    tagline: 'Ruang tenang untuk harimu.',
   },
 } as const;
 

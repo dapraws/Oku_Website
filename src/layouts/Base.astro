@@ -112,7 +112,8 @@ const alternates = (['en', 'id'] as const).map((l) => ({ l, url: new URL(href(l,
     background: var(--teak);
   }
 
-  main { flex: 1; padding: 2rem var(--gutter) 4rem; }
+  /* Clips the full-bleed rings and the ink dot at the screen edge. */
+  main { flex: 1; padding: 2rem var(--gutter) 4rem; overflow-x: clip; }
 
   .site-footer {
     display: flex;
