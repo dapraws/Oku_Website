@@ -62,10 +62,14 @@ const copy = {
   .prose h1 + .lead {
     font-family: var(--serif);
     font-size: 1.25rem;
+    font-weight: var(--read-weight);
     letter-spacing: 0;
     text-transform: none;
     color: var(--ink);
-    line-height: 1.45;
+    line-height: 1.5;
   }
-  .qa h3 { margin-top: 1.5rem; }
+  /* Each question with its answer, split from the next by a hairline. */
+  .qa { padding: 1.25rem 0; border-top: var(--hairline) solid var(--rule); }
+  .qa:last-of-type { border-bottom: var(--hairline) solid var(--rule); }
+  .qa p { margin: 0; color: var(--ink-2); }
 </style>

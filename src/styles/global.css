@@ -28,6 +28,8 @@
   --page: 76rem;
   --measure: 38rem;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Light text on dark paper reads heavier; long text drops a touch in dark mode. */
+  --read-weight: 400;
   /* spring(response 0.34, damping 0.72), sampled: the photo stack only */
   --spring: linear(0, 0.091 4.3%, 0.317 9.3%, 0.603 15%, 0.86 21.2%, 1.006 26.4%, 1.075 31.1%, 1.092 35.5%, 1.082 40.5%, 1.032 49.6%, 1.002 59%, 0.994 68.9%, 1);
 }
@@ -46,6 +48,7 @@
     --shadow-print: 0 2px 6px rgba(0, 0, 0, 0.4);
     --polaroid-frame: #FEFCF6;
     --polaroid-ink: #1A1614;
+    --read-weight: 360;
   }
 }
 
@@ -61,6 +64,8 @@ html {
   font-family: var(--serif);
   -webkit-text-size-adjust: 100%;
   font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   scrollbar-color: var(--rule) var(--paper);
 }
@@ -129,36 +134,43 @@ img { display: block; max-width: 100%; height: auto; }
   }
 }
 
-/* Long-form reading: privacy, terms, support. */
+/* Long-form reading: privacy, terms, support.
+   Four roles, each a clear step from the next:
+   title 600 large · section 500 mid · question 600 at body size · text 400.
+   Space does the grouping: wide above a section, tight between a question and its answer. */
 .prose {
   max-width: var(--measure);
   margin: 0 auto;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  font-weight: var(--read-weight);
 }
 .prose h1 {
-  font-size: clamp(2.125rem, 1.6rem + 2vw, 2.75rem);
+  font-size: clamp(2.25rem, 1.7rem + 2.2vw, 3rem);
   font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  margin: 0 0 0.75rem;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
   text-wrap: balance;
 }
 .prose h2 {
-  font-size: 1.375rem;
+  font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);
   font-weight: 500;
-  line-height: 1.25;
-  margin: 2.5rem 0 0.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.012em;
+  margin: 3.5rem 0 1rem;
   text-wrap: balance;
 }
 .prose h3 {
-  font-size: 1.125rem;
-  font-weight: 500;
-  line-height: 1.4;
-  margin: 1.75rem 0 0.25rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.45;
+  margin: 0 0 0.3rem;
   text-wrap: balance;
 }
 .prose p, .prose ul { margin: 0 0 1rem; text-wrap: pretty; }
 .prose ul { padding-left: 1.25rem; }
-.prose li { margin-bottom: 0.25rem; }
+.prose li { margin-bottom: 0.35rem; }
 .prose li::marker { color: var(--ink-3); }
 .prose a { overflow-wrap: anywhere; }
 /* "Last updated" line under the title */
@@ -167,9 +179,10 @@ img { display: block; max-width: 100%; height: auto; }
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.073em;
+  line-height: 1.4;
   text-transform: uppercase;
   color: var(--ink-2);
-  margin-bottom: 2.5rem;
-  padding-bottom: 1.5rem;
+  margin-bottom: 3rem;
+  padding-bottom: 1.75rem;
   border-bottom: var(--hairline) solid var(--rule);
 }
