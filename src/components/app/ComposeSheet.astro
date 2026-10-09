@@ -6,6 +6,7 @@ import Icon from './Icon.astro';
 import PlacePin from './PlacePin.astro';
 import Polaroid from '../Polaroid.astro';
 import sunset from '../../assets/photos/sunset.webp';
+import hills from '../../assets/photos/hills.webp';
 
 interface Props {
   lang: 'en' | 'id';
@@ -23,6 +24,7 @@ const t = {
     reasons: ['Work', 'Family', 'Self', 'Health'],
     place: 'Semarang',
     caption: 'golden hour',
+    caption2: 'the long way round',
   },
   id: {
     today: 'Hari ini',
@@ -31,6 +33,7 @@ const t = {
     reasons: ['Kerja', 'Keluarga', 'Diri sendiri', 'Kesehatan'],
     place: 'Semarang',
     caption: 'jam emas',
+    caption2: 'jalan memutar',
   },
 }[lang];
 const chosenMood = 2;
@@ -62,8 +65,12 @@ const chosenReasons = [2, 3];
     </div>
   </div>
 
+  <!-- The entry's photo stack: hover or tap and it fans out, as in Entry Detail. -->
   <div class="photo" data-drop aria-hidden="true">
-    <Polaroid src={sunset} caption={t.caption} tilt={4} />
+    <div class="stack" data-stack>
+      <Polaroid src={hills} caption={t.caption2} tilt={-3} class="print back" />
+      <Polaroid src={sunset} caption={t.caption} tilt={4} class="print front" />
+    </div>
   </div>
 
   <p class="note" data-note aria-hidden="true">
@@ -83,6 +90,9 @@ const chosenReasons = [2, 3];
     // App order: 6 OCTOBER · TUESDAY
     date.textContent = `${get('day')} ${get('month')} · ${get('weekday')}`;
   }
+
+  const stack = fig?.querySelector<HTMLElement>('[data-stack]');
+  stack?.addEventListener('click', () => stack.classList.toggle('fanned'));
 
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (fig && !still) {
@@ -209,6 +219,18 @@ const chosenReasons = [2, 3];
     .photo { right: -1.25rem; bottom: -3.5rem; width: 9.5rem; }
   }
   .photo :global(.polaroid) { width: 100%; padding: 0.5rem 0.5rem 0; }
+  .stack { position: relative; cursor: pointer; }
+  .stack :global(.print) {
+    /* The photo stack's spring (OkuMotion.fanCurve): the one place it is used. */
+    transition: rotate 520ms var(--spring), translate 520ms var(--spring);
+  }
+  .stack :global(.print.back) { position: absolute; inset: 0 auto auto 0; translate: -6% 3%; }
+  .stack :global(.print.front) { position: relative; }
+  .stack:hover :global(.print.back), .stack.fanned :global(.print.back) { rotate: -11deg; translate: -58% 6%; }
+  .stack:hover :global(.print.front), .stack.fanned :global(.print.front) { rotate: 8deg; translate: 8% -4%; }
+  @media (prefers-reduced-motion: reduce) {
+    .stack :global(.print) { transition: none; }
+  }
   .photo :global(figcaption) { height: 1.875rem; font-size: 0.9375rem; }
 
   /* A margin note under the sheet, pointing back up at the mood. */

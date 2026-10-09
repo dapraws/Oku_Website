@@ -28,6 +28,8 @@
   --page: 76rem;
   --measure: 38rem;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  /* spring(response 0.34, damping 0.72), sampled: the photo stack only */
+  --spring: linear(0, 0.091 4.3%, 0.317 9.3%, 0.603 15%, 0.86 21.2%, 1.006 26.4%, 1.075 31.1%, 1.092 35.5%, 1.082 40.5%, 1.032 49.6%, 1.002 59%, 0.994 68.9%, 1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -58,6 +60,7 @@ html {
   color: var(--ink);
   font-family: var(--serif);
   -webkit-text-size-adjust: 100%;
+  font-optical-sizing: auto;
   text-rendering: optimizeLegibility;
   scrollbar-color: var(--rule) var(--paper);
 }
@@ -133,7 +136,7 @@ img { display: block; max-width: 100%; height: auto; }
 }
 .prose h1 {
   font-size: clamp(2.125rem, 1.6rem + 2vw, 2.75rem);
-  font-weight: 400;
+  font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.01em;
   margin: 0 0 0.75rem;
@@ -141,7 +144,7 @@ img { display: block; max-width: 100%; height: auto; }
 }
 .prose h2 {
   font-size: 1.375rem;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.25;
   margin: 2.5rem 0 0.5rem;
   text-wrap: balance;

@@ -3,7 +3,7 @@
 // looks back, and every ring on the page is centred on the ink dot that holds the privacy
 // section. The app is rebuilt from its own components; one real screen (the map) stays as
 // proof. Copy: STORE.md, plus lines approved with Darrel on 2026-10-07.
-import Screen from './Screen.astro';
+import Phone from './Phone.astro';
 import ComposeSheet from './app/ComposeSheet.astro';
 import EntryRow from './app/EntryRow.astro';
 import Insights from './app/Insights.astro';
@@ -16,6 +16,7 @@ const { lang } = Astro.props;
 
 const copy = {
   en: {
+    headline: 'A quiet place for *your days.*',
     lead: 'Write about your day. Everything you write stays with you.',
     kanji: 'Named from Japanese 奥 — the inner, hidden interior of a place.',
     compose: {
@@ -24,11 +25,11 @@ const copy = {
       note: 'one word for the whole day',
     },
     write: {
-      title: 'Write a line or a page.',
+      title: 'Write a line *or a page.*',
       body: 'Mark how the day felt in one word, from Heavy to Bright, and pick up to three reasons why. Add the place, the people who were there, and a few photos, which Oku keeps as polaroids. If you don’t know how to start, borrow a line and keep going. Missed a day? Write it under its own date.',
     },
     back: {
-      title: 'See where your days happened.',
+      title: 'See where your days *happened.*',
       body: 'Home shows today and, when there is one, an entry from this day in an earlier year. Stories lays your entries out on a map, on a timeline, and by the people in them.',
       mapAlt: 'Stories, Map: entries pinned across Java and Bali, with the places listed below.',
       onThisDay: 'a year ago today',
@@ -40,13 +41,13 @@ const copy = {
       ],
     },
     felt: {
-      title: 'Notice how your days have felt.',
+      title: 'Notice how your days *have felt.*',
       body: 'Insights shows how your days have felt over time, when you tend to write, and what your days were about, without scores or advice.',
       note: 'no scores, no streaks',
       label: 'Insights, with example entries: 57 entries, mostly Good over the last 30 days, written most often on Tuesdays, and Self as the most common reason.',
     },
     private: {
-      title: 'It stays on your iPhone.',
+      title: 'It stays on *your iPhone.*',
       body: 'No account. No ads, no analytics, no tracking. Title suggestions, a gentle polish of what you wrote, and photo captions come from Apple’s on-device models, so your words are not sent anywhere. iCloud sync is off until you turn it on, and then your entries go to your own private iCloud.',
       maps: 'Looking up a place uses Apple Maps.',
       link: 'Read the privacy policy',
@@ -65,6 +66,7 @@ const copy = {
     },
   },
   id: {
+    headline: 'Ruang tenang untuk *harimu.*',
     lead: 'Tulis tentang harimu. Semua yang kamu tulis tetap bersamamu.',
     kanji: 'Diambil dari kanji 奥 — bagian dalam sebuah tempat yang tersembunyi.',
     compose: {
@@ -73,11 +75,11 @@ const copy = {
       note: 'satu kata untuk seluruh hari',
     },
     write: {
-      title: 'Satu baris atau satu halaman.',
+      title: 'Satu baris *atau satu halaman.*',
       body: 'Tandai perasaanmu hari itu dengan satu kata, dari Berat sampai Cerah, lalu pilih sampai tiga alasannya. Tambahkan tempat, orang-orang yang ada di sana, dan beberapa foto yang disimpan Oku sebagai polaroid. Bingung mulai dari mana? Pinjam satu kalimat, lalu lanjutkan. Ada hari yang terlewat? Tulis di tanggalnya sendiri.',
     },
     back: {
-      title: 'Lihat di mana harimu terjadi.',
+      title: 'Lihat di mana harimu *terjadi.*',
       body: 'Beranda menampilkan hari ini dan, kalau ada, catatan dari tanggal yang sama di tahun sebelumnya. Ceritaku menata catatanmu di peta, di riwayat, dan menurut orang-orang di dalamnya.',
       mapAlt: 'Ceritaku, Peta: catatan tersebar di Jawa dan Bali, dengan daftar tempat di bawahnya.',
       onThisDay: 'setahun lalu hari ini',
@@ -89,13 +91,13 @@ const copy = {
       ],
     },
     felt: {
-      title: 'Lihat bagaimana harimu terasa.',
+      title: 'Lihat bagaimana harimu *terasa.*',
       body: 'Ringkasan menunjukkan perasaanmu dari waktu ke waktu, kapan kamu biasa menulis, dan apa yang mengisi hari-harimu, tanpa skor atau nasihat.',
       note: 'tanpa skor, tanpa streak',
       label: 'Ringkasan dengan catatan contoh: 57 catatan, kebanyakan Baik selama 30 hari terakhir, paling sering menulis di hari Selasa, dan Diri sendiri sebagai alasan terbanyak.',
     },
     private: {
-      title: 'Tetap di iPhone-mu.',
+      title: 'Tetap di *iPhone-mu.*',
       body: 'Tanpa akun. Tanpa iklan, analitik, atau pelacakan. Saran judul, perapian tulisan, dan keterangan foto dibuat oleh model Apple di perangkatmu, jadi tulisanmu tidak dikirim ke mana pun. Sinkronisasi iCloud mati sampai kamu menyalakannya, lalu catatanmu masuk ke iCloud pribadimu sendiri.',
       maps: 'Mencari tempat memakai Apple Maps.',
       link: 'Baca kebijakan privasi',
@@ -114,7 +116,19 @@ const copy = {
   },
 }[lang];
 
-const words = chrome[lang].tagline.split(' ');
+// One italic phrase per heading, marked *like this* in the copy above.
+const em = (text: string) => text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+// The hero headline blooms word by word; words inside *...* stay italic.
+let inEm = false;
+const words = copy.headline.split(' ').map((raw) => {
+  const opens = raw.startsWith('*');
+  const closes = raw.endsWith('*') || raw.endsWith('*.');
+  const text = raw.replace(/\*/g, '');
+  const italic = inEm || opens;
+  if (opens) inEm = true;
+  if (closes) inEm = false;
+  return { text, italic };
+});
 ---
 <div class="inward" data-inward>
   <svg class="rings" aria-hidden="true" data-rings></svg>
@@ -122,7 +136,7 @@ const words = chrome[lang].tagline.split(' ');
   <section class="hero" data-ring>
     <div class="hero-text">
       <h1>
-        {words.map((w, i) => <span class="word" style={`animation-delay: ${120 + i * 110}ms`}>{w}</span>)}
+        {words.map((w, i) => <span class:list={['word', { em: w.italic }]} style={`animation-delay: ${120 + i * 110}ms`}>{w.text}</span>)}
       </h1>
       <p class="lead">{copy.lead}</p>
       <p class="kanji">{copy.kanji}</p>
@@ -133,17 +147,17 @@ const words = chrome[lang].tagline.split(' ');
   </section>
 
   <section class="write" data-ring>
-    <h2>{copy.write.title}</h2>
+    <h2 set:html={em(copy.write.title)} />
     <p>{copy.write.body}</p>
   </section>
 
   <section class="back" data-ring>
     <div class="back-text">
-      <h2>{copy.back.title}</h2>
+      <h2 set:html={em(copy.back.title)} />
       <p>{copy.back.body}</p>
     </div>
     <div class="back-art">
-      <Screen lang={lang} name="04-map" alt={copy.back.mapAlt} class="map" />
+      <Phone lang={lang} name="04-map" alt={copy.back.mapAlt} class="map" />
       <div class="slips" aria-hidden="true">
         <div class="slip otd">
           <p class="label otd-label">{copy.back.onThisDay}</p>
@@ -160,7 +174,7 @@ const words = chrome[lang].tagline.split(' ');
 
   <section class="felt" data-ring>
     <div class="felt-text">
-      <h2>{copy.felt.title}</h2>
+      <h2 set:html={em(copy.felt.title)} />
       <p>{copy.felt.body}</p>
       <p class="note" aria-hidden="true">{copy.felt.note}</p>
     </div>
@@ -170,7 +184,7 @@ const words = chrome[lang].tagline.split(' ');
   <section class="dot-wrap">
     <div class="dot" data-dot>
       <div class="dot-text">
-        <h2>{copy.private.title}</h2>
+        <h2 set:html={em(copy.private.title)} />
         <p>{copy.private.body}</p>
         <p>{copy.private.maps}</p>
         <p><a href={href(lang, 'privacy')}>{copy.private.link}</a></p>
@@ -233,7 +247,9 @@ const words = chrome[lang].tagline.split(' ');
   .rings :global(circle) { fill: none; stroke: var(--rule); stroke-width: 1; vector-effect: non-scaling-stroke; }
   section { position: relative; }
 
-  h1, h2 { font-weight: 400; text-wrap: balance; margin: 0; }
+  /* Weight carries rank on the site: display 600, section 500, everything read 400. */
+  h1, h2 { font-weight: 500; text-wrap: balance; margin: 0; font-optical-sizing: auto; }
+  h2 :global(em), h1 .em { font-style: italic; font-weight: 400; }
   h2 {
     font-size: clamp(2.25rem, 1.35rem + 3.3vw, 4.25rem);
     line-height: 1.04;
@@ -254,12 +270,15 @@ const words = chrome[lang].tagline.split(' ');
   }
   h1 {
     font-size: clamp(3rem, 1.6rem + 5vw, 6rem);
+    font-weight: 600;
     line-height: 0.98;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.035em;
     margin-bottom: 1.75rem;
   }
   .word { display: inline-block; margin-right: 0.22em; animation: bloom 420ms ease-out both; }
   .word:last-child { margin-right: 0; }
+  /* The one teak phrase on the page's first screen. */
+  h1 .em { color: var(--teak); letter-spacing: -0.02em; }
   .lead { font-size: clamp(1.1875rem, 1.05rem + 0.5vw, 1.4375rem); line-height: 1.4; max-width: 26rem; margin-bottom: 1.5rem; }
   .kanji { font-size: 0.9375rem; color: var(--ink-2); max-width: 22rem; }
   .hero-sheet { padding-bottom: 4rem; }
@@ -284,7 +303,7 @@ const words = chrome[lang].tagline.split(' ');
   }
   .back-text p, .felt-text p { font-size: 1.1875rem; line-height: 1.5; max-width: 32rem; }
   .back-art { display: grid; gap: 1.5rem; justify-items: center; }
-  .back-art :global(.map) { width: min(19rem, 78vw); }
+  .back-art :global(.map) { width: min(18rem, 74vw); }
   .slips { display: grid; gap: 1rem; width: min(100%, 26rem); }
   .slip { background: var(--paper-raised); border-radius: 2px; padding: 1rem 1.125rem; }
   .otd { box-shadow: var(--shadow-print); }
@@ -295,11 +314,11 @@ const words = chrome[lang].tagline.split(' ');
   .rows { padding-block: 0.25rem; }
   .rows :global(.row:last-child) { border-bottom: 0; }
   @media (min-width: 64rem) {
-    .back { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); align-items: center; gap: 4rem; }
+    .back { grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr); align-items: center; gap: 3rem; }
     /* Slips laid against the phone's left edge, overlapping it a little. */
     .back-art { grid-template-columns: minmax(0, 1fr) auto; align-items: end; justify-items: stretch; gap: 0; }
     .slips { grid-area: 1 / 1; position: relative; z-index: 1; width: auto; margin: 0 -2.5rem 3rem 0; rotate: -1.5deg; }
-    .back-art :global(.map) { grid-area: 1 / 2; width: 17.5rem; }
+    .back-art :global(.map) { grid-area: 1 / 2; width: 18.5rem; }
   }
 
   /* How the days felt */
