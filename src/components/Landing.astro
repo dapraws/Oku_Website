@@ -1,15 +1,16 @@
 ---
-// The landing page, "Inward". An entry writes itself, the page moves through the ways Oku
-// looks back, and every ring on the page is centred on the ink dot that holds the privacy
-// section. The app is rebuilt from its own components; one real screen (the map) stays as
-// proof. Copy: STORE.md, plus lines approved with Darrel on 2026-10-07.
+// The landing page, "Inward". The hero writes a few days, the page looks back on them, Insights
+// can be tried, every ring is centred on the ink dot that holds privacy, and "Also in Oku" is the
+// app's own Settings screen. One real screen (the map) stays as proof.
+// Copy: STORE.md, plus lines approved with Darrel (2026-10-07, 2026-10-10).
 import Phone from './Phone.astro';
 import ComposeSheet from './app/ComposeSheet.astro';
 import EntryRow from './app/EntryRow.astro';
 import Insights from './app/Insights.astro';
-import sunset from '../assets/photos/sunset.webp';
-import hills from '../assets/photos/hills.webp';
-import { chrome, href, type Lang } from '../i18n';
+import Painting from './app/Painting.astro';
+import Settings from './app/Settings.astro';
+import { entries, moods, locales } from '../entries';
+import { href, type Lang } from '../i18n';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -19,11 +20,7 @@ const copy = {
     headline: 'A quiet place for *your days.*',
     lead: 'Write about your day. Everything you write stays with you.',
     kanji: 'Named from Japanese 奥 — the inner, hidden interior of a place.',
-    compose: {
-      title: 'Suddenly quiet',
-      line: 'I felt calm today. Honestly, it feels a little strange. After so long with my heart in pieces, tired from pretending to be strong all the time, today everything suddenly went quiet.',
-      note: 'one word for the whole day',
-    },
+    note: 'how the day felt',
     write: {
       title: 'Write a line *or a page.*',
       body: 'Mark how the day felt in one word, from Heavy to Bright, and pick up to three reasons why. Add the place, the people who were there, and a few photos, which Oku keeps as polaroids. If you don’t know how to start, borrow a line and keep going. Missed a day? Write it under its own date.',
@@ -32,13 +29,8 @@ const copy = {
       title: 'See where your days *happened.*',
       body: 'Home shows today and, when there is one, an entry from this day in an earlier year. Stories lays your entries out on a map, on a timeline, and by the people in them.',
       mapAlt: 'Stories, Map: entries pinned across Java and Bali, with the places listed below.',
-      onThisDay: 'a year ago today',
-      year: { meta: '6 Oct 2025', title: 'Moving day', body: 'Boxes everywhere. Ate noodles on the floor because the table hadn’t come yet.' },
-      rows: [
-        { meta: '25 Sep · Yogyakarta', title: 'Morning walk', excerpt: 'Cold air, empty streets. Coffee with Dimas by the bridge.', mood: 'Bright', person: 'Dimas', photo: hills },
-        { meta: '19 Sep · Kuta', title: 'Sunset at Kuta', excerpt: 'Nadia and I sat on the sand until the sky went orange, then grey.', mood: 'Bright', person: 'Nadia', photo: sunset },
-        { meta: '16 Sep', title: 'Long day', excerpt: 'Woke up late, missed the train, spilled coffee on the one clean shirt.', mood: 'Neutral' },
-      ],
+      onThisDay: 'a year ago today', entries: 'entries',
+      year: { place: 'Semarang', title: 'Moving day', body: 'Boxes everywhere. Ate noodles on the floor because the table hadn’t come yet.', mood: 3 },
     },
     felt: {
       title: 'Notice how your days *have felt.*',
@@ -52,28 +44,13 @@ const copy = {
       maps: 'Looking up a place uses Apple Maps.',
       link: 'Read the privacy policy',
     },
-    also: {
-      title: 'Also in Oku',
-      items: [
-        'Voice notes, turned into text on your iPhone (English)',
-        'English and Indonesian, each written for its own language',
-        'A daily reminder, if you want one',
-        'A Face ID lock, if you want one',
-        'Light and dark appearance, and a choice of app icons',
-        'Recently Deleted keeps entries for 30 days',
-      ],
-      note: 'AI features need a device that supports Apple Intelligence.',
-    },
+    also: { title: 'Also in *Oku*', note: 'AI features need a device that supports Apple Intelligence.' },
   },
   id: {
     headline: 'Ruang tenang untuk *harimu.*',
     lead: 'Tulis tentang harimu. Semua yang kamu tulis tetap bersamamu.',
     kanji: 'Diambil dari kanji 奥 — bagian dalam sebuah tempat yang tersembunyi.',
-    compose: {
-      title: 'Hari yang hening',
-      line: 'Aku merasa tenang hari ini. Tapi jujur, rasanya agak asing untukku. Setelah sekian lama hati ini rasanya berantakan dan capek banget karena terus-terusan pura-pura kuat, hari ini mendadak semuanya hening.',
-      note: 'satu kata untuk seluruh hari',
-    },
+    note: 'rasanya hari ini',
     write: {
       title: 'Satu baris *atau satu halaman.*',
       body: 'Tandai perasaanmu hari itu dengan satu kata, dari Berat sampai Cerah, lalu pilih sampai tiga alasannya. Tambahkan tempat, orang-orang yang ada di sana, dan beberapa foto yang disimpan Oku sebagai polaroid. Bingung mulai dari mana? Pinjam satu kalimat, lalu lanjutkan. Ada hari yang terlewat? Tulis di tanggalnya sendiri.',
@@ -82,13 +59,8 @@ const copy = {
       title: 'Lihat di mana harimu *terjadi.*',
       body: 'Beranda menampilkan hari ini dan, kalau ada, catatan dari tanggal yang sama di tahun sebelumnya. Ceritaku menata catatanmu di peta, di riwayat, dan menurut orang-orang di dalamnya.',
       mapAlt: 'Ceritaku, Peta: catatan tersebar di Jawa dan Bali, dengan daftar tempat di bawahnya.',
-      onThisDay: 'setahun lalu hari ini',
-      year: { meta: '6 Okt 2025', title: 'Hari pindahan', body: 'Kardus di mana-mana. Makan mi di lantai karena mejanya belum datang.' },
-      rows: [
-        { meta: '25 Sep · Yogyakarta', title: 'Jalan pagi', excerpt: 'Udara dingin, jalanan sepi. Mampir ngopi sama Dimas dekat jembatan.', mood: 'Cerah', person: 'Dimas', photo: hills },
-        { meta: '19 Sep · Kuta', title: 'Senja di Kuta', excerpt: 'Aku dan Nadia duduk di pasir sampai langit jadi oranye, lalu abu-abu.', mood: 'Cerah', person: 'Nadia', photo: sunset },
-        { meta: '16 Sep', title: 'Hari yang panjang', excerpt: 'Bangun kesiangan, ketinggalan kereta, kopi tumpah ke satu-satunya kemeja bersih.', mood: 'Tenang' },
-      ],
+      onThisDay: 'setahun lalu hari ini', entries: 'catatan',
+      year: { place: 'Semarang', title: 'Hari pindahan', body: 'Kardus di mana-mana. Makan mi di lantai karena mejanya belum datang.', mood: 3 },
     },
     felt: {
       title: 'Lihat bagaimana harimu *terasa.*',
@@ -102,17 +74,7 @@ const copy = {
       maps: 'Mencari tempat memakai Apple Maps.',
       link: 'Baca kebijakan privasi',
     },
-    also: {
-      title: 'Juga di Oku',
-      items: [
-        'Bahasa Indonesia dan Inggris, masing-masing ditulis untuk bahasanya sendiri',
-        'Pengingat harian, kalau kamu mau',
-        'Kunci Face ID, kalau kamu mau',
-        'Tampilan terang dan gelap, dan beberapa pilihan ikon aplikasi',
-        'Baru Dihapus menyimpan catatan selama 30 hari',
-      ],
-      note: 'Fitur AI membutuhkan perangkat yang mendukung Apple Intelligence.',
-    },
+    also: { title: 'Juga di *Oku*', note: 'Fitur AI membutuhkan perangkat yang mendukung Apple Intelligence.' },
   },
 }[lang];
 
@@ -129,6 +91,10 @@ const words = copy.headline.split(' ').map((raw) => {
   if (closes) inEm = false;
   return { text, italic };
 });
+// The write paragraph inks in word by word as it scrolls past.
+const writeWords = copy.write.body.split(' ');
+const list = entries[lang];
+const year = new Date().getFullYear();
 ---
 <div class="inward" data-inward>
   <svg class="rings" aria-hidden="true" data-rings></svg>
@@ -142,13 +108,13 @@ const words = copy.headline.split(' ').map((raw) => {
       <p class="kanji">{copy.kanji}</p>
     </div>
     <div class="hero-sheet">
-      <ComposeSheet lang={lang} title={copy.compose.title} line={copy.compose.line} note={copy.compose.note} />
+      <ComposeSheet lang={lang} note={copy.note} />
     </div>
   </section>
 
   <section class="write" data-ring>
     <h2 set:html={em(copy.write.title)} />
-    <p>{copy.write.body}</p>
+    <p class="inking">{writeWords.map((w) => <span class="w">{w} </span>)}</p>
   </section>
 
   <section class="back" data-ring>
@@ -156,17 +122,33 @@ const words = copy.headline.split(' ').map((raw) => {
       <h2 set:html={em(copy.back.title)} />
       <p>{copy.back.body}</p>
     </div>
-    <div class="back-art">
+    <div class="back-art" data-back>
       <Phone lang={lang} name="04-map" alt={copy.back.mapAlt} class="map" />
       <div class="slips" aria-hidden="true">
-        <div class="slip otd">
-          <p class="label otd-label">{copy.back.onThisDay}</p>
-          <p class="otd-meta label">{copy.back.year.meta}</p>
-          <p class="otd-title">{copy.back.year.title}</p>
-          <p class="otd-body">{copy.back.year.body}</p>
+        <!-- On This Day: Teak Wash, as on Home. The year rolls back when it comes into view. -->
+        <div class="slip otd" data-locale={locales[lang]}>
+          <p class="label otd-label">
+            <span>{copy.back.onThisDay}</span>
+            <span class="otd-date"><span data-otd-day></span> <span class="year"><span class="roll"><span>{year}</span><span>{year - 1}</span></span></span></span>
+          </p>
+          <div class="otd-row">
+            <div class="thumb"><Painting scene="night" seed={4} /></div>
+            <div>
+              <p class="otd-meta label">{copy.back.year.place}</p>
+              <p class="otd-title">{copy.back.year.title}</p>
+              <p class="otd-body">{copy.back.year.body}</p>
+              <p class="otd-mood"><i></i>{moods[lang][copy.back.year.mood]}</p>
+            </div>
+          </div>
         </div>
         <div class="slip rows">
-          {copy.back.rows.map((r) => <EntryRow {...r} />)}
+          <p class="label rows-head">{copy.back.entries}</p>
+          {list.map((e, i) => (
+            <div class="deal" style={`--d: ${i}`}>
+              <EntryRow scene={e.scene} daysAgo={e.daysAgo} place={e.place} meta={e.place}
+                title={e.title} excerpt={e.body} mood={moods[lang][e.mood]} person={e.person} />
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -193,17 +175,15 @@ const words = copy.headline.split(' ').map((raw) => {
   </section>
 
   <section class="also">
-    <h2>{copy.also.title}</h2>
-    <ul>
-      {copy.also.items.map((item) => <li>{item}</li>)}
-    </ul>
+    <h2 set:html={em(copy.also.title)} />
+    <Settings lang={lang} />
     <p class="also-note">{copy.also.note}</p>
   </section>
 </div>
 
 <script>
-  // Rings: one hairline circle per section, all centred on the ink dot. Without this
-  // script there are no rings; nothing else changes.
+  // Rings: one hairline circle per section, all centred on the ink dot. As the dot is reached,
+  // they close in on it. Without this script there are no rings; nothing else changes.
   const root = document.querySelector<HTMLElement>('[data-inward]');
   const svg = root?.querySelector<SVGSVGElement>('[data-rings]');
   const dot = root?.querySelector<HTMLElement>('[data-dot]');
@@ -215,6 +195,7 @@ const words = copy.headline.split(' ').map((raw) => {
       const cx = wrap.left + wrap.width / 2 - box.left;
       const cy = wrap.top + wrap.height / 2 - box.top;
       svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+      svg.style.transformOrigin = `${cx}px ${cy}px`;
       svg.replaceChildren();
       for (const s of root.querySelectorAll<HTMLElement>('[data-ring]')) {
         const c = document.createElementNS(ns, 'circle');
@@ -227,6 +208,37 @@ const words = copy.headline.split(' ').map((raw) => {
     draw();
     new ResizeObserver(draw).observe(root);
   }
+
+  // On This Day: today's date, and the year turning back one when the slip comes into view.
+  const otd = document.querySelector<HTMLElement>('.otd');
+  if (otd) {
+    const day = otd.querySelector<HTMLElement>('[data-otd-day]');
+    const locale = otd.dataset.locale ?? 'en-GB';
+    // App style: 10 OCT (three-letter month, whatever the browser's short form is).
+    const short = (d: Date) => {
+      const p = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }).formatToParts(d);
+      const get = (k: string) => p.find((x) => x.type === k)?.value ?? '';
+      return `${get('day')} ${get('month').replace('.', '').slice(0, 3)}`;
+    };
+    if (day) day.textContent = short(new Date());
+    // Rows: today's entries, dated relative to today, app order (10 OCT · KUTA).
+    for (const meta of document.querySelectorAll<HTMLElement>('[data-days]')) {
+      if (!meta.dataset.place) continue;
+      const d = new Date();
+      d.setDate(d.getDate() - Number(meta.dataset.days));
+      meta.textContent = `${short(d)} · ${meta.dataset.place}`;
+    }
+  }
+  const back = document.querySelector<HTMLElement>('[data-back]');
+  if (back && !matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+    back.classList.add('waiting');
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      back.classList.replace('waiting', 'shown');
+    }, { threshold: 0.35 });
+    io.observe(back);
+  }
 </script>
 
 <style>
@@ -234,6 +246,7 @@ const words = copy.headline.split(' ').map((raw) => {
     position: relative;
     max-width: var(--page);
     margin: 0 auto;
+    timeline-scope: --dot;
   }
   .rings {
     position: absolute;
@@ -283,36 +296,58 @@ const words = copy.headline.split(' ').map((raw) => {
   .kanji { font-size: 0.9375rem; color: var(--ink-2); max-width: 22rem; }
   .hero-sheet { padding-bottom: 4rem; }
 
-  /* An editorial beat between the busy hero and the look back */
+  /* An editorial beat: the paragraph inks in as it passes, word by word. */
   .write {
     max-width: 46rem;
     margin: 0 auto;
     padding: clamp(5rem, 14vh, 9rem) 0;
     text-align: center;
   }
-  .write p {
-    font-size: clamp(1.1875rem, 1rem + 0.7vw, 1.5rem);
-    line-height: 1.5;
+  .write p { font-size: clamp(1.25rem, 1rem + 0.9vw, 1.6875rem); line-height: 1.5; }
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .w {
+        color: var(--ink-3);
+        animation: ink linear both;
+        animation-timeline: view();
+        animation-range: entry 85% cover 55%;
+      }
+    }
   }
+  @keyframes ink { to { color: var(--ink); } }
 
   /* Look back: the one real screen, with slips laid against it */
-  .back {
-    display: grid;
-    gap: 3rem;
-    padding: clamp(5rem, 12vh, 8rem) 0;
-  }
+  .back { display: grid; gap: 3rem; padding: clamp(5rem, 12vh, 8rem) 0; }
   .back-text p, .felt-text p { font-size: 1.1875rem; line-height: 1.5; max-width: 32rem; }
   .back-art { display: grid; gap: 1.5rem; justify-items: center; }
   .back-art :global(.map) { width: min(18rem, 74vw); }
   .slips { display: grid; gap: 1rem; width: min(100%, 26rem); }
   .slip { background: var(--paper-raised); border-radius: 2px; padding: 1rem 1.125rem; }
-  .otd { box-shadow: var(--shadow-print); }
-  .otd-label { color: var(--teak); margin-bottom: 0.75rem; }
+
+  /* On This Day, as on Home: Teak Wash, square. */
+  .otd { background: var(--teak-faded); border-radius: 0; box-shadow: var(--shadow-print); }
+  .otd-label { display: flex; justify-content: space-between; gap: 1rem; color: var(--ink-2); margin-bottom: 0.875rem; }
+  .otd-date { color: var(--ink); white-space: nowrap; }
+  .year { display: inline-block; height: 1em; overflow: hidden; vertical-align: -0.12em; }
+  .roll { display: grid; transition: translate 900ms var(--ease) 350ms; }
+  .roll > span { height: 1em; line-height: 1; }
+  .otd-row { display: grid; grid-template-columns: 4rem minmax(0, 1fr); gap: 0.875rem; }
+  .thumb { width: 4rem; height: 5rem; padding: 4px 4px 20px; background: var(--polaroid-frame); border-radius: 2px; }
   .otd-meta { color: var(--ink-2); margin-bottom: 0.4rem; font-size: 0.6875rem; }
-  .otd-title { font-size: 1.375rem; line-height: 1.2; margin-bottom: 0.25rem; }
-  .otd-body { font-size: 0.9375rem; color: var(--ink-2); }
-  .rows { padding-block: 0.25rem; }
-  .rows :global(.row:last-child) { border-bottom: 0; }
+  .otd-title { font-size: 1.25rem; line-height: 1.2; margin-bottom: 0.25rem; }
+  .otd-body { font-size: 0.9375rem; color: var(--ink-2); margin-bottom: 0.5rem; }
+  .otd-mood { display: flex; align-items: center; gap: 0.3rem; font-size: 0.8125rem; color: var(--ink-2); }
+  .otd-mood i { width: 5px; height: 5px; border-radius: 50%; background: var(--teak); }
+  .rows { padding-block: 0.875rem 0.25rem; }
+  .rows-head { color: var(--ink-3); }
+  .rows .deal:last-child :global(.row) { border-bottom: 0; }
+
+  /* Without JS the year shows last year's; with it, it rolls there. */
+  .back-art:not(.waiting) .roll { translate: 0 -1em; }
+  .waiting .deal { opacity: 0; translate: 0 -0.75rem; rotate: -1.5deg; }
+  .shown .deal { animation: deal 520ms var(--ease) both; animation-delay: calc(var(--d) * 140ms + 300ms); }
+  @keyframes deal { from { opacity: 0; translate: 0 -0.75rem; rotate: -1.5deg; } }
+
   @media (min-width: 64rem) {
     .back { grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr); align-items: center; gap: 3rem; }
     /* Slips laid against the phone's left edge, overlapping it a little. */
@@ -324,21 +359,15 @@ const words = copy.headline.split(' ').map((raw) => {
   /* How the days felt */
   .felt { padding: clamp(5rem, 12vh, 8rem) 0; display: grid; gap: 2.5rem; }
   .felt-text { position: relative; }
-  .note {
-    font-family: var(--hand);
-    font-size: 1.375rem;
-    color: var(--teak);
-    rotate: -3deg;
-    margin-top: 1rem;
-  }
+  .note { font-family: var(--hand); font-size: 1.375rem; color: var(--teak); rotate: -3deg; margin-top: 1rem; }
   @media (min-width: 64rem) {
     .felt-text { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 0 4rem; align-items: end; }
     .felt-text h2 { grid-row: span 2; margin: 0; }
     .note { justify-self: start; }
   }
 
-  /* The ink dot: the private place at the centre. It grows as you reach it. */
-  .dot-wrap { padding: clamp(3rem, 8vh, 6rem) 0; }
+  /* The ink dot: the private place at the centre. It grows as you reach it, and the rings close in. */
+  .dot-wrap { padding: clamp(3rem, 8vh, 6rem) 0; view-timeline: --dot block; }
   .dot {
     width: max(150vw, 38rem);
     max-width: 52rem;
@@ -362,16 +391,15 @@ const words = copy.headline.split(' ').map((raw) => {
     @supports (animation-timeline: view()) {
       .dot { animation: grow linear both; animation-timeline: view(); animation-range: entry 0% cover 45%; }
       .dot-text { animation: arrive linear both; animation-timeline: view(); animation-range: entry 60% cover 50%; }
+      .rings { animation: close-in linear both; animation-timeline: --dot; animation-range: entry 0% cover 50%; }
     }
   }
   @keyframes grow { from { scale: 0.06; } }
   @keyframes arrive { from { opacity: 0; filter: blur(4px); } }
+  @keyframes close-in { to { scale: 0.86; } }
 
-  /* Back out on the paper */
-  .also { max-width: 36rem; margin: 0 auto; padding: 2rem 0 4rem; }
-  .also h2 { font-size: 1.625rem; margin-bottom: 1rem; }
-  .also ul { margin: 0 0 1.5rem; padding: 0; list-style: none; }
-  .also li { padding: 0.8rem 0; border-bottom: var(--hairline) solid var(--rule); }
-  .also li:first-child { border-top: var(--hairline) solid var(--rule); }
-  .also-note { font-size: 0.9375rem; color: var(--ink-2); }
+  /* Back out on the paper: the app's Settings */
+  .also { padding: 2rem 0 4rem; }
+  .also h2 { font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem); text-align: center; margin-bottom: 2rem; }
+  .also-note { font-size: 0.9375rem; color: var(--ink-2); text-align: center; margin-top: 2rem; }
 </style>

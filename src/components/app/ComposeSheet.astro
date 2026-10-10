@@ -1,75 +1,78 @@
 ---
-// The hero: Compose's dot-grid sheet, writing itself. Title and words type in the writer's
-// hand, then the day is marked: mood, reasons, place, a photo. Without JS, or with Reduce
-// Motion, the finished entry is simply there.
+// The hero: Compose's dot-grid sheet, writing a day, then the next. Each entry types in the
+// writer's hand, marks its mood, reasons, people and place, and sets a photo on the stack;
+// then the ink lifts and the page turns to the next day. Every entry's text sits in the DOM
+// (stacked in one grid cell), so the sheet never changes height and no-JS shows the first.
+// Reduce Motion shows the first entry, finished.
 import Icon from './Icon.astro';
 import PlacePin from './PlacePin.astro';
 import Polaroid from '../Polaroid.astro';
-import sunset from '../../assets/photos/sunset.webp';
-import hills from '../../assets/photos/hills.webp';
+import { entries, moods, locales } from '../../entries';
+import type { Lang } from '../../i18n';
 
-interface Props {
-  lang: 'en' | 'id';
-  title: string;
-  line: string;
-  note: string;
-}
-const { lang, title, line, note } = Astro.props;
-
+interface Props { lang: Lang; note: string }
+const { lang, note } = Astro.props;
+const list = entries[lang];
 const t = {
-  en: {
-    today: 'Today',
-    feeling: 'Feeling', reason: 'Reason', where: 'Where',
-    moods: ['Heavy', 'Sad', 'Neutral', 'Good', 'Bright'],
-    reasons: ['Work', 'Family', 'Self', 'Health'],
-    place: 'Semarang',
-    caption: 'golden hour',
-    caption2: 'the long way round',
-  },
-  id: {
-    today: 'Hari ini',
-    feeling: 'Perasaan', reason: 'Alasan', where: 'Di mana',
-    moods: ['Berat', 'Sedih', 'Tenang', 'Baik', 'Cerah'],
-    reasons: ['Kerja', 'Keluarga', 'Diri sendiri', 'Kesehatan'],
-    place: 'Semarang',
-    caption: 'jam emas',
-    caption2: 'jalan memutar',
-  },
+  en: { today: 'Today', feeling: 'Feeling', reason: 'Reason', who: 'Who', where: 'Where', addPeople: 'Add people' },
+  id: { today: 'Hari ini', feeling: 'Perasaan', reason: 'Alasan', who: 'Siapa', where: 'Di mana', addPeople: 'Tambah orang' },
 }[lang];
-const chosenMood = 2;
-const chosenReasons = [2, 3];
+const tilts = [4, -4, 8];
 ---
-<figure class="compose" data-compose role="img" aria-label={`${title}. ${line}`}>
+<figure class="compose" data-compose data-locale={locales[lang]} data-days={list.map((e) => e.daysAgo).join(',')}
+  data-moods={list.map((e) => e.mood).join(',')} role="img" aria-label={`${list[0].title}. ${list[0].body}`}>
   <div class="sheet" aria-hidden="true">
-    <p class="label date" data-date data-lang={lang}>{t.today}</p>
-    <p class="title" data-type="title">{title}</p>
-    <p class="words" data-type="words">{line}</p>
+    <p class="label date" data-date>{t.today}</p>
+
+    <p class="slot title">
+      {list.map((e, i) => <span class:list={['e', { on: i === 0 }]} data-e={i} data-type>{e.title}</span>)}
+    </p>
+    <p class="slot words">
+      {list.map((e, i) => <span class:list={['e', { on: i === 0 }]} data-e={i} data-type>{e.body}</span>)}
+    </p>
 
     <div class="section" data-step>
       <p class="label"><Icon name="smiley" size={15} />{t.feeling}</p>
       <div class="chips">
-        {t.moods.map((m, i) => <span class:list={['chip', { on: i === chosenMood }]} data-pick={i === chosenMood ? '' : undefined}><i></i>{m}</span>)}
+        {moods[lang].map((m, i) => <span class:list={['chip', 'mood', { on: i === list[0].mood }]} data-mood={i}><i></i>{m}</span>)}
       </div>
     </div>
 
     <div class="section" data-step>
       <p class="label"><Icon name="question" size={15} />{t.reason}</p>
-      <div class="chips">
-        {t.reasons.map((r, i) => <span class:list={['chip', { on: chosenReasons.includes(i) }]} data-pick={chosenReasons.includes(i) ? '' : undefined}>{r}</span>)}
+      <div class="slot">
+        {list.map((e, i) => (
+          <div class:list={['chips', 'e', { on: i === 0 }]} data-e={i}>
+            {e.reasons.map((r, j) => <span class:list={['chip', { on: e.picked.includes(j) }]} data-pick={e.picked.includes(j) ? '' : undefined}>{r}</span>)}
+          </div>
+        ))}
       </div>
     </div>
 
-    <div class="section where" data-step>
+    <div class="section row" data-step>
+      <p class="label"><Icon name="users" size={15} />{t.who}</p>
+      <span class="slot value">
+        {list.map((e, i) => (
+          <span class:list={['e', { on: i === 0, add: !e.person }]} data-e={i}>{e.person ?? t.addPeople}</span>
+        ))}
+      </span>
+    </div>
+
+    <div class="section row" data-step>
       <p class="label"><Icon name="mapPin" size={15} />{t.where}</p>
-      <span class="place"><PlacePin size={16} />{t.place}</span>
+      <span class="slot value">
+        {list.map((e, i) => <span class:list={['e', 'place', { on: i === 0 }]} data-e={i}><PlacePin size={16} />{e.place}</span>)}
+      </span>
     </div>
   </div>
 
-  <!-- The entry's photo stack: hover or tap and it fans out, as in Entry Detail. -->
-  <div class="photo" data-drop aria-hidden="true">
+  <!-- The photo stack: each day's print lands on top. Hover or tap fans it, as in Entry Detail. -->
+  <div class="photo" aria-hidden="true">
     <div class="stack" data-stack>
-      <Polaroid src={hills} caption={t.caption2} tilt={-3} class="print back" />
-      <Polaroid src={sunset} caption={t.caption} tilt={4} class="print front" />
+      {list.map((e, i) => (
+        <Polaroid scene={e.scene} caption={e.caption} tilt={tilts[i]} seed={i + 1}
+          class={`print p${i}${i === 0 ? ' landed' : ''}`} />
+      ))}
     </div>
   </div>
 
@@ -81,78 +84,140 @@ const chosenReasons = [2, 3];
 
 <script>
   const fig = document.querySelector<HTMLElement>('[data-compose]');
-  const date = fig?.querySelector<HTMLElement>('[data-date]');
-  if (date) {
-    const lang = date.dataset.lang === 'id' ? 'id-ID' : 'en-GB';
-    const today = new Intl.DateTimeFormat(lang, { weekday: 'long', day: 'numeric', month: 'long' })
-      .formatToParts(new Date());
-    const get = (k: string) => today.find((p) => p.type === k)?.value ?? '';
-    // App order: 6 OCTOBER · TUESDAY
-    date.textContent = `${get('day')} ${get('month')} · ${get('weekday')}`;
-  }
-
-  const stack = fig?.querySelector<HTMLElement>('[data-stack]');
-  stack?.addEventListener('click', () => stack.classList.toggle('fanned'));
-
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (fig && !still) {
-    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    const typers = [...fig.querySelectorAll<HTMLElement>('[data-type]')];
-    const steps = [...fig.querySelectorAll<HTMLElement>('[data-step]')];
-    const drop = fig.querySelector<HTMLElement>('[data-drop]');
-    const note = fig.querySelector<HTMLElement>('[data-note]');
-    const caret = document.createElement('span');
-    caret.className = 'caret';
-
-    // Stage: keep each text's full height so nothing below jumps while it types.
-    const texts = typers.map((el) => el.textContent ?? '');
-    typers.forEach((el, i) => {
-      const done = document.createElement('span');
-      const rest = document.createElement('span');
-      rest.className = 'rest';
-      rest.textContent = texts[i];
-      el.replaceChildren(done, rest);
-    });
-    fig.classList.add('staged');
-
-    const type = async (el: HTMLElement, text: string, speed: number) => {
-      const [done, rest] = el.children as unknown as HTMLElement[];
-      el.insertBefore(caret, rest);
-      for (let i = 1; i <= text.length; i++) {
-        done.textContent = text.slice(0, i);
-        rest.textContent = text.slice(i);
-        const ch = text[i - 1];
-        await wait('.!?'.includes(ch) ? 360 : ',;'.includes(ch) ? 160 : speed + Math.random() * speed);
-      }
+  if (fig) {
+    const locale = fig.dataset.locale ?? 'en-GB';
+    const days = (fig.dataset.days ?? '0').split(',').map(Number);
+    const moodOf = (fig.dataset.moods ?? '2').split(',').map(Number);
+    const dateEl = fig.querySelector<HTMLElement>('[data-date]')!;
+    const setDate = (i: number) => {
+      const d = new Date();
+      d.setDate(d.getDate() - days[i]);
+      const parts = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long' }).formatToParts(d);
+      const get = (k: string) => parts.find((p) => p.type === k)?.value ?? '';
+      dateEl.textContent = `${get('day')} ${get('month')} · ${get('weekday')}`; // app order
     };
+    setDate(0);
 
-    const play = async () => {
-      await wait(500);
-      await type(typers[0], texts[0], 55);
-      await wait(350);
-      await type(typers[1], texts[1], 16);
-      await wait(500);
-      for (const step of steps) {
-        step.classList.add('shown');
-        await wait(260);
-        for (const pick of step.querySelectorAll<HTMLElement>('[data-pick]')) {
-          pick.classList.add('picked');
-          if (step === steps[0]) note?.classList.add('shown');
-          await wait(280);
+    const stack = fig.querySelector<HTMLElement>('[data-stack]')!;
+    stack.addEventListener('click', () => stack.classList.toggle('fanned'));
+
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) run(fig);
+
+    function run(fig: HTMLElement) {
+      const count = days.length;
+      const steps = [...fig.querySelectorAll<HTMLElement>('[data-step]')];
+      const moodChips = [...fig.querySelectorAll<HTMLElement>('.mood')];
+      const prints = [...fig.querySelectorAll<HTMLElement>('.print')];
+      const note = fig.querySelector<HTMLElement>('[data-note]')!;
+      const sheet = fig.querySelector<HTMLElement>('.sheet')!;
+      const caret = document.createElement('span');
+      caret.className = 'caret';
+
+      // Run only while the hero is on screen and the tab is visible.
+      let onScreen = true;
+      new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; }).observe(fig);
+      const ready = () => onScreen && !document.hidden;
+      const wait = (ms: number) => new Promise<void>((done) => {
+        let left = ms, last = performance.now();
+        const tick = (now: number) => {
+          if (ready()) left -= now - last;
+          last = now;
+          left <= 0 ? done() : requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
+
+      // Split each typed text into a written part and a hidden remainder that holds its space.
+      const typers = [...fig.querySelectorAll<HTMLElement>('[data-type]')];
+      const texts = new Map(typers.map((el) => [el, el.textContent ?? '']));
+      for (const el of typers) {
+        const done = document.createElement('span');
+        const rest = document.createElement('span');
+        rest.className = 'rest';
+        el.replaceChildren(done, rest);
+      }
+      const clear = (el: HTMLElement) => {
+        const [done, rest] = el.children as unknown as HTMLElement[];
+        done.textContent = '';
+        rest.textContent = texts.get(el)!;
+      };
+      const type = async (el: HTMLElement, speed: number) => {
+        const text = texts.get(el)!;
+        const [done, rest] = el.children as unknown as HTMLElement[];
+        el.insertBefore(caret, rest);
+        for (let i = 1; i <= text.length; i++) {
+          done.textContent = text.slice(0, i);
+          rest.textContent = text.slice(i);
+          const ch = text[i - 1];
+          await wait('.!?'.includes(ch) ? 340 : ',;'.includes(ch) ? 150 : speed + Math.random() * speed);
         }
-        await wait(160);
-      }
-      drop?.classList.add('shown');
-    };
-    play();
+      };
+
+      const show = (i: number) => {
+        for (const el of fig.querySelectorAll<HTMLElement>('[data-e]')) el.classList.toggle('on', el.dataset.e === String(i));
+        setDate(i);
+        fig.setAttribute('aria-label', `${texts.get(typers[i])}. ${texts.get(typers[count + i])}`);
+      };
+      const reset = () => {
+        typers.forEach(clear);
+        steps.forEach((s) => s.classList.remove('shown'));
+        fig.querySelectorAll('.picked').forEach((c) => c.classList.remove('picked'));
+        note.classList.remove('shown');
+      };
+
+      fig.classList.add('staged');
+      reset();
+      let z = 10;
+
+      const write = async (i: number) => {
+        show(i);
+        await wait(450);
+        await type(typers[i], 55);          // title
+        await wait(300);
+        await type(typers[count + i], 15);  // body
+        await wait(450);
+        for (const [n, step] of steps.entries()) {
+          step.classList.add('shown');
+          await wait(240);
+          const picks = n === 0 ? [moodChips[moodOf[i]]] : [...step.querySelectorAll<HTMLElement>('.e.on [data-pick]')];
+          for (const pick of picks) {
+            pick.classList.add('picked');
+            if (n === 0) note.classList.add('shown');
+            await wait(260);
+          }
+          await wait(120);
+        }
+        const print = prints[i];
+        print.style.zIndex = String(++z);
+        print.classList.remove('landed');
+        void print.offsetWidth; // restart the drop
+        print.classList.add('landed');
+      };
+
+      const turn = async () => {
+        caret.remove();
+        sheet.classList.add('lifting');
+        await wait(360);
+        reset();
+        sheet.classList.remove('lifting');
+      };
+
+      (async () => {
+        prints.forEach((p, n) => n > 0 && p.classList.remove('landed'));
+        prints[0].classList.remove('landed');
+        for (let i = 0; ; i = (i + 1) % count) {
+          if (i === 0) prints.forEach((p) => p.classList.remove('landed'));
+          await write(i);
+          await wait(3600);
+          await turn();
+        }
+      })();
+    }
   }
 </script>
 
 <style>
-  .compose {
-    position: relative;
-    margin: 0;
-  }
+  .compose { position: relative; margin: 0; }
   .sheet {
     position: relative;
     padding: 1.5rem 1.5rem 1.75rem;
@@ -164,86 +229,59 @@ const chosenReasons = [2, 3];
     box-shadow: var(--shadow-print);
   }
   p { margin: 0; }
-  .label {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    color: var(--ink-2);
-  }
+  .label { display: flex; align-items: center; gap: 0.4rem; color: var(--ink-2); }
   .date { margin-bottom: 1.25rem; }
-  .title {
-    font-family: var(--hand);
-    font-size: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
-    line-height: 1.15;
-    margin-bottom: 0.5rem;
-  }
-  .words {
-    font-family: var(--hand);
-    font-size: clamp(1.1875rem, 1.05rem + 0.4vw, 1.375rem);
-    line-height: 1.5;
-    margin-bottom: 1.5rem;
-  }
-  .section {
-    padding: 0.875rem 0;
-    border-top: var(--hairline) solid var(--rule);
-  }
-  .section .label { margin-bottom: 0.625rem; }
-  .where { display: flex; align-items: center; gap: 2rem; }
-  .where .label { margin: 0; }
+
+  /* Every entry sits in one grid cell; only the current one is visible, so height never jumps. */
+  .slot { display: grid; }
+  .slot > .e { grid-area: 1 / 1; visibility: hidden; }
+  .slot > .e.on { visibility: visible; }
+
+  .title { font-family: var(--hand); font-size: clamp(1.75rem, 1.4rem + 1vw, 2.25rem); line-height: 1.15; margin-bottom: 0.5rem; }
+  .words { font-family: var(--hand); font-size: clamp(1.1875rem, 1.05rem + 0.4vw, 1.375rem); line-height: 1.5; margin-bottom: 1.5rem; }
+
+  .section { padding: 0.875rem 0; border-top: var(--hairline) solid var(--rule); }
+  .section > .label { margin-bottom: 0.625rem; }
+  .row { display: flex; align-items: center; gap: 2rem; }
+  .row > .label { margin: 0; min-width: 5.5rem; }
+  .value { font-size: 1.0625rem; }
+  .value .add { font-size: 0.9375rem; color: var(--ink-2); text-decoration: underline; text-decoration-thickness: var(--hairline); text-underline-offset: 0.2em; }
+  .place { display: inline-flex; align-items: center; gap: 0.5rem; }
+
   .chips { display: flex; flex-wrap: wrap; gap: 0.375rem; }
   /* DESIGN.md chip: callout serif, 0.5pt rule outline, 2px radius */
   .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
+    display: inline-flex; align-items: center; gap: 0.3rem;
     padding: 0.375rem 0.75rem;
-    font-size: 0.9375rem;
-    color: var(--ink-2);
-    border: var(--hairline) solid var(--rule);
-    border-radius: 2px;
+    font-size: 0.9375rem; color: var(--ink-2);
+    border: var(--hairline) solid var(--rule); border-radius: 2px;
     transition: background-color 200ms ease-out, border-color 200ms ease-out, color 200ms ease-out;
   }
   .chip i { width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3); transition: background-color 200ms ease-out; }
   .chip.on { background: var(--paper-raised); color: var(--ink); border-color: var(--teak); }
   .chip.on i { background: var(--teak); }
-  .place { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 1.0625rem; }
 
-  /* Phones: the print hangs below the sheet, clear of the place row. */
-  .photo {
-    position: absolute;
-    right: -0.25rem;
-    bottom: -7rem;
-    width: 8.5rem;
-  }
-  @media (min-width: 40rem) {
-    .photo { right: -1.25rem; bottom: -3.5rem; width: 9.5rem; }
-  }
+  /* Phones: the stack hangs below the sheet, clear of the rows. */
+  .photo { position: absolute; right: -0.25rem; bottom: -7rem; width: 8.5rem; }
+  @media (min-width: 40rem) { .photo { right: -1.25rem; bottom: -3.5rem; width: 9.5rem; } }
   .photo :global(.polaroid) { width: 100%; padding: 0.5rem 0.5rem 0; }
+  .photo :global(figcaption) { height: 1.875rem; font-size: 1rem; }
+
   .stack { position: relative; cursor: pointer; }
-  .stack :global(.print) {
-    /* The photo stack's spring (OkuMotion.fanCurve): the one place it is used. */
-    transition: rotate 520ms var(--spring), translate 520ms var(--spring);
-  }
-  .stack :global(.print.back) { position: absolute; inset: 0 auto auto 0; translate: -6% 3%; }
-  .stack :global(.print.front) { position: relative; }
-  .stack:hover :global(.print.back), .stack.fanned :global(.print.back) { rotate: -11deg; translate: -58% 6%; }
-  .stack:hover :global(.print.front), .stack.fanned :global(.print.front) { rotate: 8deg; translate: 8% -4%; }
-  @media (prefers-reduced-motion: reduce) {
-    .stack :global(.print) { transition: none; }
-  }
-  .photo :global(figcaption) { height: 1.875rem; font-size: 0.9375rem; }
+  .stack :global(.print) { transition: rotate 520ms var(--spring), translate 520ms var(--spring); }
+  .stack :global(.print:not(.p0)) { position: absolute; inset: 0 auto auto 0; }
+  .stack :global(.p1) { translate: -7% 3%; }
+  .stack :global(.p2) { translate: 6% -3%; }
+  .stack:hover :global(.p0), .stack.fanned :global(.p0) { rotate: 2deg; translate: 0 -2%; }
+  .stack:hover :global(.p1), .stack.fanned :global(.p1) { rotate: -13deg; translate: -62% 6%; }
+  .stack:hover :global(.p2), .stack.fanned :global(.p2) { rotate: 14deg; translate: 52% 4%; }
 
   /* A margin note under the sheet, pointing back up at the mood. */
   .note {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.25rem;
+    display: flex; align-items: flex-start; gap: 0.25rem;
     margin: 1.25rem 0 0 0.5rem;
-    font-family: var(--hand);
-    font-size: 1.3125rem;
-    line-height: 1.1;
-    color: var(--teak);
-    rotate: -2deg;
+    font-family: var(--hand); font-size: 1.3125rem; line-height: 1.1;
+    color: var(--teak); rotate: -2deg;
     max-width: min(16rem, calc(100% - 9.5rem));
   }
   .note svg { flex: none; rotate: 70deg; margin-top: -0.75rem; }
@@ -252,22 +290,25 @@ const chosenReasons = [2, 3];
   /* Staged by the script only. */
   .staged :global(.rest) { visibility: hidden; }
   .staged :global(.caret) {
-    display: inline-block;
-    width: 2px;
-    height: 1em;
-    margin: 0 1px -0.12em;
-    background: var(--teak);
-    animation: blink 1s steps(1) infinite;
+    display: inline-block; width: 2px; height: 1em; margin: 0 1px -0.12em;
+    background: var(--teak); animation: blink 1s steps(1) infinite;
   }
   .staged [data-step] { opacity: 0; translate: 0 6px; transition: opacity 320ms var(--ease), translate 320ms var(--ease); }
   .staged [data-step].shown { opacity: 1; translate: 0 0; }
-  .staged .chip.on { background: transparent; color: var(--ink-2); border-color: var(--rule); }
-  .staged .chip.on i { background: var(--ink-3); }
-  .staged .chip.on.picked { background: var(--paper-raised); color: var(--ink); border-color: var(--teak); }
-  .staged .chip.on.picked i { background: var(--teak); }
+  .staged .chip.on:not(.picked), .staged .mood:not(.picked) { background: transparent; color: var(--ink-2); border-color: var(--rule); }
+  .staged .chip:not(.picked) i { background: var(--ink-3); }
+  .staged .chip.picked { background: var(--paper-raised); color: var(--ink); border-color: var(--teak); }
+  .staged .chip.picked i { background: var(--teak); }
   .staged .note { opacity: 0; filter: blur(4px); transition: opacity 320ms ease-out, filter 320ms ease-out; }
   .staged .note.shown { opacity: 1; filter: none; }
-  .staged .photo { opacity: 0; translate: 0.5rem -1.5rem; rotate: -6deg; transition: opacity 260ms ease-out, translate 600ms var(--ease), rotate 600ms var(--ease); }
-  .staged .photo.shown { opacity: 1; translate: 0 0; rotate: 0deg; }
+  /* A print lands: from above, turned, then set down. */
+  .staged :global(.print) { opacity: 0; }
+  .staged :global(.print.landed) { opacity: 1; animation: land 640ms var(--ease) both; }
+  @keyframes land { from { opacity: 0; transform: translate(0.5rem, -1.75rem) rotate(-8deg); } }
+  /* Ink lift: the page clears before the next day is written (DESIGN.md motion). */
+  .sheet.lifting .title, .sheet.lifting .words, .sheet.lifting [data-step] {
+    opacity: 0; filter: blur(4px); translate: 0 -4px;
+    transition: opacity 320ms ease-out, filter 320ms ease-out, translate 320ms ease-out;
+  }
   @keyframes blink { 50% { opacity: 0; } }
 </style>

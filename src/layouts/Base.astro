@@ -21,6 +21,8 @@ const alternates = (['en', 'id'] as const).map((l) => ({ l, url: new URL(href(l,
 <html lang={lang}>
   <head>
     <meta charset="utf-8" />
+    <!-- Apply a theme picked on the page before first paint (per-viewer, optional). -->
+    <script is:inline>try{var t=localStorage.getItem('oku-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />

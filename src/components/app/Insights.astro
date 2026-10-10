@@ -1,46 +1,48 @@
 ---
-// Oku's Insights, rebuilt from DESIGN.md with example data: stat cards, the mood line with its
-// teak wash, the 12-week rhythm grid and the why doughnut. Draws in once when it scrolls into view.
+// Oku's Insights, rebuilt from DESIGN.md with example data, and usable: pick a timeframe and the
+// mood line redraws, touch a point for its day, pick a reason to see its share and usual mood.
+// Draws in once when it scrolls into view. Dates are filled in on the client, relative to today.
 import Icon from './Icon.astro';
+import { moods, locales } from '../../entries';
+import type { Lang } from '../../i18n';
 
-interface Props { lang: 'en' | 'id'; label: string }
+interface Props { lang: Lang; label: string }
 const { lang, label } = Astro.props;
 
 const t = {
   en: {
     stats: ['entries', 'this week', 'days this month'],
     mood: 'mood over time', frames: ['30 days', '90 days', 'all time'],
-    mostly: 'Mostly Good', across: 'across 16 days',
-    levels: ['Bright', 'Good', 'Neutral', 'Sad', 'Heavy'],
-    dates: ['8 Sep', '22 Sep', '6 Oct'],
+    mostly: 'Mostly', across: (n: number) => `across ${n} days`,
+    first: 'First', last: 'Last', journaling: '57 days journaling',
     rhythm: 'rhythm · last 12 weeks', days: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-    months: ['Jul', 'Aug', 'Sep', 'Oct'], peak: 'Most often on Tuesday.',
-    why: 'why · 30 days',
+    peak: 'Most often on Tuesday.', why: 'why · 30 days', usually: 'Usually',
     reasons: ['Self', 'Friends', 'Health', 'Work', 'School'],
   },
   id: {
     stats: ['catatan', 'minggu ini', 'hari bulan ini'],
     mood: 'suasana hati', frames: ['30 hari', '90 hari', 'sepanjang waktu'],
-    mostly: 'Kebanyakan Baik', across: 'dari 16 hari',
-    levels: ['Cerah', 'Baik', 'Tenang', 'Sedih', 'Berat'],
-    dates: ['8 Sep', '22 Sep', '6 Okt'],
+    mostly: 'Kebanyakan', across: (n: number) => `dari ${n} hari`,
+    first: 'Pertama', last: 'Terakhir', journaling: '57 hari menulis',
     rhythm: 'ritme · 12 minggu terakhir', days: ['S', 'S', 'R', 'K', 'J', 'S', 'M'],
-    months: ['Jul', 'Agu', 'Sep', 'Okt'], peak: 'Paling sering di hari Selasa.',
-    why: 'alasan · 30 hari',
+    peak: 'Paling sering di hari Selasa.', why: 'alasan · 30 hari', usually: 'Biasanya',
     reasons: ['Diri sendiri', 'Teman', 'Kesehatan', 'Kerja', 'Sekolah'],
   },
 }[lang];
+const levels = moods[lang];
 
-// Mood: 16 entry days across 30 days, 1 (Heavy) to 5 (Bright). Mostly Good.
-const days = [0, 2, 3, 5, 7, 8, 10, 12, 14, 16, 18, 20, 22, 25, 27, 29];
-const mood = [5, 1, 4, 3, 4, 2, 4, 5, 2, 4, 5, 3, 4, 4, 3, 5];
+// Three timeframes, 16 points each so a switch reads as one line changing its mind.
+const frames = [
+  { span: 29, days: 16, mood: [5, 1, 4, 3, 4, 2, 4, 5, 2, 4, 5, 3, 4, 4, 3, 3] },
+  { span: 89, days: 41, mood: [3, 4, 3, 4, 4, 2, 3, 4, 5, 4, 3, 4, 4, 5, 4, 3] },
+  { span: 179, days: 57, mood: [4, 3, 4, 5, 4, 4, 3, 2, 3, 4, 5, 5, 4, 4, 4, 3] },
+];
 const W = 560, H = 210, L = 6, R = 96, T = 10, B = 30;
-const x = (d: number) => L + (d / 29) * (W - L - R);
+const x = (k: number) => L + (k / 15) * (W - L - R);
 const y = (m: number) => T + ((5 - m) / 4) * (H - T - B);
-const pts = days.map((d, i) => [x(d), y(mood[i])] as const);
 
 // Monotone cubic (Fritsch–Carlson), like Swift Charts' .monotone.
-function monotone(p: readonly (readonly [number, number])[]) {
+function monotone(p: [number, number][]) {
   const n = p.length, dx: number[] = [], m: number[] = [], tan: number[] = [];
   for (let i = 0; i < n - 1; i++) { dx[i] = p[i + 1][0] - p[i][0]; m[i] = (p[i + 1][1] - p[i][1]) / dx[i]; }
   tan[0] = m[0]; tan[n - 1] = m[n - 2];
@@ -52,17 +54,26 @@ function monotone(p: readonly (readonly [number, number])[]) {
   }
   return d;
 }
-const line = monotone(pts);
 const base = y(0.6);
-const area = `${line} L${pts.at(-1)![0].toFixed(1)},${base} L${pts[0][0].toFixed(1)},${base} Z`;
-const last = pts.at(-1)!;
+const charts = frames.map((f) => {
+  const pts = f.mood.map((m, k) => [x(k), y(m)] as [number, number]);
+  const line = monotone(pts);
+  const counts = [1, 2, 3, 4, 5].map((v) => f.mood.filter((m) => m === v).length);
+  const top = counts.lastIndexOf(Math.max(...counts));
+  return {
+    ...f, pts, line,
+    area: `${line} L${pts.at(-1)![0].toFixed(1)},${base} L${pts[0][0].toFixed(1)},${base} Z`,
+    summary: levels[top],
+    ago: f.mood.map((_, k) => Math.round(f.span - (k / 15) * f.span)),
+  };
+});
 
 // Rhythm: 12 weeks x 7 days, Monday first; Tuesdays busiest. Deterministic example data.
 let seed = 7;
 const rand = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
 const grid = Array.from({ length: 12 }, (_, w) =>
   Array.from({ length: 7 }, (_, d) => {
-    if (w === 11 && d > 1) return -1; // after today
+    if (w === 11 && d > 1) return -1;
     const r = rand() + (d === 1 ? 0.45 : 0) - (d >= 5 ? 0.15 : 0);
     return r > 1.05 ? 2 : r > 0.55 ? 1 : 0;
   }),
@@ -70,8 +81,9 @@ const grid = Array.from({ length: 12 }, (_, w) =>
 const weekdayTotals = t.days.map((_, d) => grid.reduce((s, w) => s + Math.max(0, w[d]), 0));
 const peakDay = weekdayTotals.indexOf(Math.max(...weekdayTotals));
 
-// Why: counts per reason; top reason teak, the rest ink at falling opacity (25% minimum).
+// Why: top reason teak, the rest ink at falling opacity (25% minimum). Usual mood per reason.
 const counts = [5, 4, 3, 2, 2];
+const usual = [2, 4, 3, 2, 1];
 const total = counts.reduce((a, b) => a + b, 0);
 const opac = [1, 0.8, 0.6, 0.4, 0.25];
 const arc = (a0: number, a1: number, r0: number, r1: number) => {
@@ -82,12 +94,15 @@ const arc = (a0: number, a1: number, r0: number, r1: number) => {
 let acc = 0;
 const slices = counts.map((c, i) => {
   const a0 = (acc / total) * Math.PI * 2 + 0.015, a1 = ((acc + c) / total) * Math.PI * 2 - 0.015;
+  const mid = (a0 + a1) / 2;
   acc += c;
-  return { d: arc(a0, a1, 42, 66), top: i === 0, o: opac[i] };
+  return { d: arc(a0, a1, 42, 66), o: opac[i], dx: (4 * Math.sin(mid)).toFixed(2), dy: (-4 * Math.cos(mid)).toFixed(2) };
 });
 const stats = [{ n: 57, icon: 'notebook' }, { n: 5, icon: 'calendarDots' }, { n: 4, icon: 'calendarCheck' }] as const;
 ---
-<div class="insights" data-insights role="img" aria-label={label}>
+<div class="insights" data-insights data-locale={locales[lang]}>
+  <p class="sr-only">{label}</p>
+
   <div class="stats" aria-hidden="true">
     {stats.map((s, i) => (
       <div class="stat">
@@ -98,38 +113,46 @@ const stats = [{ n: 57, icon: 'notebook' }, { n: 5, icon: 'calendarDots' }, { n:
     ))}
   </div>
 
-  <div class="panel mood" aria-hidden="true">
+  <div class="panel mood" data-frame="0">
     <p class="label">{t.mood}</p>
-    <div class="frames">
-      {t.frames.map((f, i) => <span class:list={['label', 'frame', { on: i === 0 }]}>{f}</span>)}
+    <div class="frames" role="group" aria-label={t.mood}>
+      {t.frames.map((f, i) => <button type="button" class="label frame" data-pick-frame={i} aria-pressed={i === 0 ? 'true' : 'false'}>{f}</button>)}
     </div>
-    <p class="summary"><span>{t.mostly}</span> {t.across}</p>
-    <svg class="chart" viewBox={`0 0 ${W} ${H}`}>
-      <defs>
-        <linearGradient id={`wash-${lang}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="var(--teak)" stop-opacity="0.22" />
-          <stop offset="1" stop-color="var(--teak)" stop-opacity="0" />
-        </linearGradient>
-      </defs>
-      {t.levels.map((lv, i) => (
-        <text class="axis" x={W - R + 12} y={y(5 - i) + 3.5}>{lv.toUpperCase()}</text>
-      ))}
-      <line class="neutral" x1={L} x2={W - R} y1={y(3)} y2={y(3)} />
-      <path class="wash" d={area} fill={`url(#wash-${lang})`} />
-      <path class="line" d={line} pathLength="1" />
-      {pts.map(([px, py]) => <circle class="pt" cx={px} cy={py} r="3" />)}
-      <circle class="latest" cx={last[0]} cy={last[1]} r="5.5" />
-      {t.dates.map((d, i) => (
-        <text class="axis" x={[L, (L + W - R) / 2, W - R][i]} y={H - 6} text-anchor={['start', 'middle', 'end'][i]}>{d.toUpperCase()}</text>
-      ))}
-    </svg>
+    <div class="summaries">
+      {charts.map((c, i) => <p class="summary" data-f={i}><span>{t.mostly} {c.summary}</span> {t.across(c.days)}</p>)}
+    </div>
+    <div class="chart-wrap">
+      <svg class="chart" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        <defs>
+          <linearGradient id={`wash-${lang}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="var(--teak)" stop-opacity="0.22" />
+            <stop offset="1" stop-color="var(--teak)" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        {[...levels].reverse().map((lv, i) => <text class="axis" x={W - R + 12} y={y(5 - i) + 4}>{lv.toUpperCase()}</text>)}
+        <line class="neutral" x1={L} x2={W - R} y1={y(3)} y2={y(3)} />
+        <line class="cursor" x1="0" x2="0" y1={T} y2={H - B} data-cursor />
+        {charts.map((c, i) => (
+          <g class="series" data-f={i}>
+            <path class="wash" d={c.area} fill={`url(#wash-${lang})`} />
+            <path class="line" d={c.line} pathLength="1" />
+            {c.pts.map(([px, py], k) => (
+              <circle class:list={['pt', { latest: k === 15 }]} cx={px} cy={py} r={k === 15 ? 5.5 : 3.5}
+                data-ago={c.ago[k]} data-mood={c.mood[k] - 1} />
+            ))}
+          </g>
+        ))}
+        {[0, 1, 2].map((k) => <text class="axis date" data-axis={k} x={[L, (L + W - R) / 2, W - R][k]} y={H - 6} text-anchor={['start', 'middle', 'end'][k]}></text>)}
+      </svg>
+      <p class="tip label" data-tip hidden></p>
+    </div>
+    <p class="footer label" aria-hidden="true">
+      <span>{t.first} <span data-ago-label="179"></span></span><span>{t.last} <span data-ago-label="0"></span></span><span>{t.journaling}</span>
+    </p>
   </div>
 
   <div class="panel rhythm" aria-hidden="true">
     <p class="label">{t.rhythm}</p>
-    <div class="grid months">
-      {t.months.map((m, i) => <span class="month label" style={`grid-column: ${2 + [0, 3, 7, 11][i]} `}>{m}</span>)}
-    </div>
     <div class="grid">
       {t.days.map((d, di) => (
         <>
@@ -143,106 +166,177 @@ const stats = [{ n: 57, icon: 'notebook' }, { n: 5, icon: 'calendarDots' }, { n:
     <p class="peakline">{t.peak}</p>
   </div>
 
-  <div class="panel why" aria-hidden="true">
+  <div class="panel why">
     <p class="label">{t.why}</p>
     <div class="why-body">
-      <svg viewBox="0 0 136 136" class="doughnut">
-        {slices.map((s, i) => <path d={s.d} class:list={{ top: s.top }} style={`--o: ${s.o}; --i: ${i}`} />)}
-      </svg>
+      <div class="doughnut-wrap">
+        <svg viewBox="0 0 136 136" class="doughnut" aria-hidden="true">
+          {slices.map((s, i) => <path d={s.d} class:list={{ top: i === 0 }} data-slice={i} style={`--o: ${s.o}; --i: ${i}; --dx: ${s.dx}px; --dy: ${s.dy}px`} />)}
+        </svg>
+        <div class="hole" aria-hidden="true">
+          {t.reasons.map((r, i) => (
+            <span class="hole-text" data-r={i}><span class="label">{r}</span><span class="share">{Math.round((counts[i] / total) * 100)}%</span></span>
+          ))}
+        </div>
+      </div>
       <ul>
         {t.reasons.map((r, i) => (
-          <li><i style={`--o: ${opac[i]}`} class:list={{ top: i === 0 }}></i>{r}<span>{counts[i]}</span></li>
+          <li><button type="button" data-pick-reason={i} aria-pressed="false">
+            <i style={`--o: ${opac[i]}`} class:list={{ top: i === 0 }}></i>{r}<span>{counts[i]}</span>
+          </button></li>
         ))}
       </ul>
+    </div>
+    <div class="usual">
+      {t.reasons.map((_, i) => <p class="usual-line" data-r={i}><i></i>{t.usually} {levels[usual[i]]}</p>)}
     </div>
   </div>
 </div>
 
 <script>
   const root = document.querySelector<HTMLElement>('[data-insights]');
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (root && !still && 'IntersectionObserver' in window) {
-    root.classList.add('waiting');
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      io.disconnect();
-      root.classList.remove('waiting');
-      root.classList.add('drawn');
-      // Stat numbers count up, as in the app.
-      for (const el of root.querySelectorAll<HTMLElement>('[data-count]')) {
-        const end = Number(el.dataset.count);
-        const t0 = performance.now();
-        const tick = (now: number) => {
-          const k = Math.min(1, (now - t0) / 900);
-          el.textContent = String(Math.round(end * (1 - Math.pow(1 - k, 3))));
-          if (k < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-      }
-    }, { threshold: 0.35 });
-    io.observe(root);
+  if (root) {
+    const locale = root.dataset.locale ?? 'en-GB';
+    const short = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' });
+    // App style: 11 SEP (three-letter month, whatever the browser's short form is).
+    const fmt = (ago: number) => {
+      const d = new Date();
+      d.setDate(d.getDate() - ago);
+      const p = short.formatToParts(d);
+      const get = (k: string) => p.find((x) => x.type === k)?.value ?? '';
+      return `${get('day')} ${get('month').replace('.', '').slice(0, 3)}`.toUpperCase();
+    };
+    const mood = root.querySelector<HTMLElement>('.mood')!;
+    const levels = [...root.querySelectorAll<SVGTextElement>('.axis:not(.date)')].map((n) => n.textContent ?? '').reverse();
+
+    // Timeframe chips: the line redraws for 30 days, 90 days or all time.
+    const setFrame = (f: number) => {
+      mood.dataset.frame = String(f);
+      root.querySelectorAll<HTMLButtonElement>('[data-pick-frame]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.pickFrame === String(f))));
+      const line = root.querySelector<SVGPathElement>(`.series[data-f="${f}"] .line`);
+      if (line) { line.style.animation = 'none'; void line.getBoundingClientRect(); line.style.animation = ''; }
+      const pts = [...root.querySelectorAll<SVGCircleElement>(`.series[data-f="${f}"] .pt`)];
+      [0, 7, 15].forEach((k, n) => {
+        const el = root.querySelector(`[data-axis="${n}"]`);
+        if (el) el.textContent = fmt(Number(pts[k].dataset.ago));
+      });
+      hideTip();
+    };
+    root.querySelectorAll<HTMLButtonElement>('[data-pick-frame]').forEach((b) => b.addEventListener('click', () => setFrame(Number(b.dataset.pickFrame))));
+
+    // A point shows its day and mood, with a dashed rule through it.
+    const tip = root.querySelector<HTMLElement>('[data-tip]')!;
+    const cursor = root.querySelector<SVGLineElement>('[data-cursor]')!;
+    const hideTip = () => { tip.hidden = true; cursor.classList.remove('on'); };
+    root.querySelectorAll<SVGCircleElement>('.pt').forEach((pt) => {
+      const showTip = () => {
+        const svg = pt.ownerSVGElement!;
+        const box = svg.getBoundingClientRect();
+        const k = box.width / svg.viewBox.baseVal.width;
+        const cx = Number(pt.getAttribute('cx')), cy = Number(pt.getAttribute('cy'));
+        tip.textContent = `${fmt(Number(pt.dataset.ago))} · ${levels[Number(pt.dataset.mood)]}`;
+        tip.style.left = `${cx * k}px`;
+        tip.style.top = `${cy * k}px`;
+        tip.hidden = false;
+        cursor.setAttribute('x1', String(cx)); cursor.setAttribute('x2', String(cx));
+        cursor.classList.add('on');
+      };
+      pt.addEventListener('pointerenter', showTip);
+      pt.addEventListener('click', showTip);
+    });
+    root.querySelector('.chart')?.addEventListener('pointerleave', hideTip);
+
+    // Why: pick a reason (row or slice) to see its share and its usual mood; pick again to let go.
+    const why = root.querySelector<HTMLElement>('.why')!;
+    const pick = (r: string | null) => {
+      if (r === null || why.dataset.picked === r) delete why.dataset.picked;
+      else why.dataset.picked = r;
+      root.querySelectorAll<HTMLButtonElement>('[data-pick-reason]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.pickReason === why.dataset.picked)));
+    };
+    root.querySelectorAll<HTMLButtonElement>('[data-pick-reason]').forEach((b) => b.addEventListener('click', () => pick(b.dataset.pickReason!)));
+    root.querySelectorAll<SVGPathElement>('[data-slice]').forEach((s) => s.addEventListener('click', () => pick(s.dataset.slice!)));
+    root.querySelector('.hole')?.addEventListener('click', () => pick(null));
+
+    setFrame(0);
+    root.querySelectorAll<HTMLElement>('[data-ago-label]').forEach((el) => { el.textContent = fmt(Number(el.dataset.agoLabel)); });
+
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+      root.classList.add('waiting');
+      const io = new IntersectionObserver(([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        root.classList.replace('waiting', 'drawn');
+        for (const el of root.querySelectorAll<HTMLElement>('[data-count]')) {
+          const end = Number(el.dataset.count), t0 = performance.now();
+          const tick = (now: number) => {
+            const k = Math.min(1, (now - t0) / 900);
+            el.textContent = String(Math.round(end * (1 - Math.pow(1 - k, 3))));
+            if (k < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
+      }, { threshold: 0.3 });
+      io.observe(root);
+    }
   }
 </script>
 
 <style>
-  .insights {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: minmax(0, 1fr);
-  }
+  .insights { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
   @media (min-width: 52rem) {
     .insights {
       grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-      grid-template-areas: 'stats stats' 'mood rhythm' 'mood why';
+      grid-template-areas: 'stats rhythm' 'mood rhythm' 'mood why';
+      align-items: stretch;
     }
-    .stats { grid-area: stats; }
-    .mood { grid-area: mood; }
-    .rhythm { grid-area: rhythm; }
-    .why { grid-area: why; }
+    .stats { grid-area: stats; } .mood { grid-area: mood; } .rhythm { grid-area: rhythm; } .why { grid-area: why; }
   }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   p { margin: 0; }
   .label { color: var(--ink-2); }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 
   .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
-  .stat {
-    display: grid;
-    gap: 0.5rem;
-    align-content: start;
-    padding: 1rem;
-    background: var(--paper-raised);
-    border-radius: 2px;
-    color: var(--ink-2);
-  }
+  .stat { display: grid; gap: 0.5rem; align-content: start; padding: 1rem; background: var(--paper-raised); border-radius: 2px; color: var(--ink-2); }
   .num { font-size: clamp(2rem, 1.6rem + 1.4vw, 2.75rem); line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
   .stat .label { line-height: 1.3; }
 
-  .panel {
-    padding: 1.25rem;
-    background: var(--paper-raised);
-    border-radius: 2px;
-  }
+  .panel { padding: 1.25rem; background: var(--paper-raised); border-radius: 2px; }
+  .mood { display: flex; flex-direction: column; }
+  /* Insights' numeric footer: first entry, last entry, days journaling. */
+  .footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.25rem 1rem; margin-top: auto; padding-top: 1.25rem; font-size: 0.625rem; color: var(--ink-3); }
   .panel > .label { margin-bottom: 0.875rem; }
-  .frames { display: flex; gap: 0.375rem; margin-bottom: 1rem; }
-  .frame { padding: 0.5rem 0.625rem; border: var(--hairline) solid var(--rule); border-radius: 2px; font-size: 0.6875rem; }
-  .frame.on { background: var(--paper); color: var(--ink); border-color: var(--teak); }
-  .summary { font-size: 0.9375rem; color: var(--ink-2); margin-bottom: 0.75rem; }
-  .summary span { font-size: 1.375rem; color: var(--ink); }
+  .frames { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 1rem; }
+  .frame { min-height: 2.25rem; padding: 0 0.625rem; border: var(--hairline) solid var(--rule); border-radius: 2px; font-size: 0.6875rem; transition: background-color 200ms ease-out, border-color 200ms ease-out, color 200ms ease-out; }
+  .frame:hover { color: var(--ink); }
+  .frame[aria-pressed='true'] { background: var(--paper); color: var(--ink); border-color: var(--teak); }
+  .summaries { display: grid; margin-bottom: 0.75rem; }
+  .summary { grid-area: 1 / 1; font-size: 0.9375rem; color: var(--ink-2); opacity: 0; transition: opacity 200ms ease-out; }
+  .summary span { font-size: 1.375rem; font-weight: 500; color: var(--ink); }
+  .mood[data-frame='0'] .summary[data-f='0'], .mood[data-frame='1'] .summary[data-f='1'], .mood[data-frame='2'] .summary[data-f='2'] { opacity: 1; }
 
-  .chart { width: 100%; height: auto; overflow: visible; }
+  .chart-wrap { position: relative; }
+  .chart { width: 100%; height: auto; overflow: visible; display: block; }
   .axis { font: 500 12px var(--mono); letter-spacing: 0.08em; fill: var(--ink-3); }
   .neutral { stroke: var(--ink-3); stroke-width: 0.5; stroke-dasharray: 4 4; }
+  .cursor { stroke: var(--ink-3); stroke-width: 0.5; stroke-dasharray: 2 3; opacity: 0; }
+  .cursor.on { opacity: 1; }
+  .series { opacity: 0; pointer-events: none; transition: opacity 320ms ease-out; }
+  .mood[data-frame='0'] .series[data-f='0'], .mood[data-frame='1'] .series[data-f='1'], .mood[data-frame='2'] .series[data-f='2'] { opacity: 1; pointer-events: auto; }
   .line { fill: none; stroke: var(--teak); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .pt { fill: var(--teak); }
-  .latest { fill: var(--paper); stroke: var(--teak); stroke-width: 2.5; }
-
-  .grid {
-    display: grid;
-    grid-template-columns: 1rem repeat(12, minmax(0, 1fr));
-    gap: 3px;
-    align-items: center;
+  .pt { fill: var(--teak); cursor: pointer; transition: r 200ms ease-out; }
+  .pt:hover { r: 6; }
+  .pt.latest { fill: var(--paper); stroke: var(--teak); stroke-width: 2.5; }
+  /* Re-drawing the line when the timeframe changes */
+  .mood[data-frame] .series .line { stroke-dasharray: 1; animation: draw 900ms var(--ease) both; }
+  .tip {
+    position: absolute; translate: -50% calc(-100% - 12px);
+    padding: 0.4rem 0.55rem; white-space: nowrap; font-size: 0.6875rem; color: var(--ink);
+    background: var(--paper-raised); border: var(--hairline) solid var(--rule); border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(26, 22, 20, 0.15); pointer-events: none;
   }
-  .months { margin-bottom: 4px; }
-  .month { font-size: 0.625rem; white-space: nowrap; }
+
+  .grid { display: grid; grid-template-columns: 1rem repeat(12, minmax(0, 1fr)); gap: 3px; align-items: center; }
   .day { font-size: 0.625rem; color: var(--ink-3); }
   .day.peak { color: var(--teak); }
   .cell { aspect-ratio: 1; border-radius: 2px; background: color-mix(in srgb, var(--rule) 60%, transparent); }
@@ -253,29 +347,40 @@ const stats = [{ n: 57, icon: 'notebook' }, { n: 5, icon: 'calendarDots' }, { n:
   .peakline { font-size: 0.9375rem; color: var(--ink-2); margin-top: 0.875rem; }
 
   .why-body { display: flex; align-items: center; gap: 1.25rem; }
-  .doughnut { width: 7.5rem; flex: none; }
-  .doughnut path { fill: var(--ink); opacity: var(--o); }
+  .doughnut-wrap { position: relative; width: 8rem; flex: none; }
+  .doughnut { width: 100%; display: block; overflow: visible; }
+  .doughnut path { fill: var(--ink); opacity: var(--o); cursor: pointer; transition: opacity 200ms ease-out, translate 260ms var(--ease); }
   .doughnut path.top { fill: var(--teak); opacity: 1; }
-  ul { list-style: none; margin: 0; padding: 0; flex: 1; font-size: 0.9375rem; }
-  li { display: flex; align-items: center; gap: 0.5rem; padding: 0.15rem 0; }
-  li i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); opacity: var(--o); }
+  .hole { position: absolute; inset: 31%; display: grid; place-items: center; text-align: center; border-radius: 50%; cursor: pointer; }
+  .hole-text { grid-area: 1 / 1; display: grid; gap: 0.1rem; opacity: 0; transition: opacity 200ms ease-out; }
+  .hole-text .label { font-size: 0.5625rem; line-height: 1.1; }
+  .share { font-size: 1.25rem; line-height: 1; }
+  ul { list-style: none; margin: 0; padding: 0; flex: 1; font-size: 0.9375rem; min-width: 0; }
+  li button { display: flex; width: 100%; align-items: center; gap: 0.5rem; min-height: 1.9rem; text-align: left; }
+  li i { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--ink); opacity: var(--o); }
   li i.top { background: var(--teak); opacity: 1; }
   li span { margin-left: auto; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  li button[aria-pressed='true'] { font-weight: 600; }
+  .usual { display: grid; }
+  .usual-line { grid-area: 1 / 1; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.875rem; font-size: 0.9375rem; color: var(--ink-2); opacity: 0; transition: opacity 200ms ease-out; }
+  .usual-line i { width: 6px; height: 6px; border-radius: 50%; background: var(--teak); }
+  /* A picked reason: its slice steps out, the rest fade, the hole and the usual mood show it. */
+  .why[data-picked] .doughnut path { opacity: calc(var(--o) * 0.3); }
+  .why[data-picked] .doughnut path.top { opacity: 0.3; }
+  .why[data-picked='0'] [data-slice='0'], .why[data-picked='1'] [data-slice='1'], .why[data-picked='2'] [data-slice='2'],
+  .why[data-picked='3'] [data-slice='3'], .why[data-picked='4'] [data-slice='4'] { opacity: max(var(--o), 0.6); translate: var(--dx) var(--dy); }
+  .why[data-picked='0'] [data-slice='0'] { opacity: 1; }
+  .why[data-picked='0'] [data-r='0'], .why[data-picked='1'] [data-r='1'], .why[data-picked='2'] [data-r='2'],
+  .why[data-picked='3'] [data-r='3'], .why[data-picked='4'] [data-r='4'] { opacity: 1; }
 
   /* Draw-in, only when the script is waiting for the panel to appear. */
-  .drawn .line { animation: draw 1100ms var(--ease) both; stroke-dasharray: 1; }
-  .waiting .line { stroke-dasharray: 1; stroke-dashoffset: 1; }
-  .waiting .wash, .waiting .pt, .waiting .latest { opacity: 0; }
-  .drawn .wash, .drawn .pt, .drawn .latest { animation: fade 500ms ease-out 700ms both; }
+  .waiting .line { stroke-dashoffset: 1; animation: none; }
+  .waiting .wash, .waiting .pt { opacity: 0; }
+  .drawn .wash, .drawn .pt { animation: fade 500ms ease-out 700ms both; }
   .waiting .cell { scale: 0.4; opacity: 0; }
   .drawn .cell { animation: cell 260ms var(--ease) both; animation-delay: calc(var(--n) * 6ms + 200ms); }
   .waiting .doughnut path { opacity: 0; }
-  .drawn .doughnut path { animation: slice 400ms ease-out both; animation-delay: calc(var(--i) * 90ms + 300ms); }
   @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
   @keyframes fade { from { opacity: 0; } }
   @keyframes cell { from { scale: 0.4; opacity: 0; } }
-  @keyframes slice { from { opacity: 0; } }
-  .drawn .doughnut path { animation-name: slice-to; }
-  @keyframes slice-to { from { opacity: 0; } to { opacity: var(--o); } }
-  .drawn .doughnut path.top { animation-name: fade; }
 </style>
