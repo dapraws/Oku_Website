@@ -54,4 +54,4 @@ npm run dev
 
 ---
 
-<sub>© Muhammad Darrel Prawira. All rights reserved.</sub>
+<sub>© dapraws. All rights reserved.</sub>
