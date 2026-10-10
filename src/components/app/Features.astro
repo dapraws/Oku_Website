@@ -5,6 +5,7 @@
 // Floating pauses off screen; Reduce Motion holds everything still.
 import Icon from './Icon.astro';
 import PlacePin from './PlacePin.astro';
+import Polaroid from '../Polaroid.astro';
 import { moods } from '../../entries';
 import type { Lang } from '../../i18n';
 
@@ -18,9 +19,11 @@ const t = {
     lines: ['Today I went ', 'I want to remember ', 'The best part was ___.', 'Something small that happened '],
     voice: 'Voice note', voiceNote: 'Turned into text on your iPhone',
     now: 'now', reminder: 'The page waits.', reminderLabel: 'Daily reminder',
-    unlock: 'Unlock with Face ID', icons: 'App icon',
-    deleted: 'Recently deleted', deletedEntry: 'Long day', gone: 'Gone in 28 days',
-    language: 'Language', appearance: 'Light and dark',
+    unlock: 'Unlock with Face ID',
+    who: 'Who', people: ['Damon', 'Mum', 'Nadia'],
+    reason: 'Reason', limit: 'Up to 3.', reasons: ['Work', 'Family', 'Friends', 'Self', 'Health', 'Food', 'Love', 'Hobbies'],
+    photos: 'Photos', captions: ['the long way round', 'golden hour', 'rain again'],
+    where: 'Where', language: 'Language',
   },
   id: {
     body: 'Tandai perasaanmu hari itu dengan satu kata, [dari Berat sampai Cerah], lalu pilih sampai [tiga alasannya]. Tambahkan tempat, orang-orang yang ada di sana, dan beberapa foto yang disimpan Oku sebagai [polaroid]. Bingung mulai dari mana? [Pinjam satu kalimat], lalu lanjutkan. Ada hari yang terlewat? Tulis di [tanggalnya sendiri].',
@@ -28,9 +31,11 @@ const t = {
     lines: ['Hari ini aku pergi ', 'Aku ingin mengingat ', 'Bagian terbaiknya ___.', 'Hal kecil yang terjadi '],
     voice: '', voiceNote: '',
     now: 'sekarang', reminder: 'Halaman menunggu.', reminderLabel: 'Pengingat harian',
-    unlock: 'Buka dengan Face ID', icons: 'Ikon aplikasi',
-    deleted: 'Baru dihapus', deletedEntry: 'Hari yang panjang', gone: 'Hilang dalam 28 hari',
-    language: 'Bahasa', appearance: 'Terang dan gelap',
+    unlock: 'Buka dengan Face ID',
+    who: 'Siapa', people: ['Damon', 'Ibu', 'Nadia'],
+    reason: 'Alasan', limit: 'Maksimal 3.', reasons: ['Kerja', 'Keluarga', 'Teman', 'Diri sendiri', 'Kesehatan', 'Makanan', 'Cinta', 'Hobi'],
+    photos: 'Foto', captions: ['jalan memutar', 'jam emas', 'hujan lagi'],
+    where: 'Di mana', language: 'Bahasa',
   },
 }[lang];
 
@@ -75,10 +80,9 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
 
     <div class="piece notice" style="--d: 9s; --o: -3s; --r: 1deg">
       <span class="app-icon"><b></b></span>
-      <div>
-        <p class="notice-head"><span>Oku</span><span>{t.now}</span></p>
-        <p class="notice-body">{t.reminder}</p>
-      </div>
+      <p class="notice-app">Oku</p>
+      <p class="notice-time">{t.now}</p>
+      <p class="notice-body">{t.reminder}</p>
     </div>
 
     <div class="piece lock" style="--d: 8s; --o: -0.8s; --r: -1.5deg">
@@ -87,18 +91,28 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
       <p class="lock-action">{t.unlock}</p>
     </div>
 
-    <div class="piece icons" style="--d: 7.4s; --o: -2.6s; --r: 2deg">
-      <p class="label">{t.icons}</p>
-      <div class="icon-row">
-        <span class="app mark"><b></b></span>
-        <span class="app word">Oku</span>
-        <span class="app kanji">奥</span>
+    <div class="piece who" style="--d: 7.4s; --o: -2.6s; --r: 2deg">
+      <p class="label"><Icon name="users" size={14} />{t.who}</p>
+      <div class="faces">
+        {t.people.map((p) => <span class="face">{p[0]}</span>)}
       </div>
+      <p class="names">{t.people.join(', ')}</p>
     </div>
 
-    <div class="piece deleted" style="--d: 8.8s; --o: -1.6s; --r: -1deg">
-      <p class="label">{t.deleted}</p>
-      <p class="deleted-row"><span>{t.deletedEntry}</span><span class="gone">{t.gone}</span></p>
+    <div class="piece reasons" style="--d: 8.8s; --o: -1.6s; --r: -1deg">
+      <p class="label"><Icon name="question" size={14} />{t.reason}</p>
+      <div class="reason-chips" data-reasons>
+        {t.reasons.map((r) => <span class="chip">{r}</span>)}
+      </div>
+      <p class="limit">{t.limit}</p>
+    </div>
+
+    <div class="piece photos" style="--d: 8.2s; --o: -0.6s; --r: 3deg">
+      <p class="label"><Icon name="image" size={14} />{t.photos}</p>
+      <div class="print-wrap">
+        <Polaroid scene="hills" caption={t.captions[0]} class="mini-print" />
+      </div>
+      <span hidden data-captions={JSON.stringify(t.captions)}></span>
     </div>
 
     <div class="piece lang" style="--d: 7.6s; --o: -3.4s; --r: 1.5deg">
@@ -107,8 +121,16 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
     </div>
 
     <div class="piece where" style="--d: 9.4s; --o: -2.2s; --r: -2deg">
-      <p class="label"><Icon name="mapPin" size={14} /></p>
-      <p class="place"><PlacePin size={16} />Kuta</p>
+      <p class="label"><Icon name="mapPin" size={14} />{t.where}</p>
+      <div class="map">
+        <svg viewBox="4 10 268 64" aria-hidden="true">
+          <path class="land" d="M10,40 C30,30 60,31 90,37 C120,43 150,39 180,45 C200,49 220,51 232,57 L229,65 C205,63 180,61 150,57 C120,55 90,57 60,53 C40,51 20,51 12,49 Z" />
+          <path class="land" d="M240,58 C248,53 259,55 266,59 C263,66 252,68 243,64 Z" />
+          <path class="land" d="M200,18 C215,14 240,16 262,22 L258,27 C236,24 214,23 202,25 Z" />
+        </svg>
+        <span class="map-pin"><PlacePin size={18} /></span>
+      </div>
+      <p class="place">Kuta</p>
     </div>
   </div>
 </div>
@@ -136,12 +158,34 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
       word.textContent = words[m] ?? word.textContent;
     }, 1600);
 
+    // Reason: up to three chips are picked, then a different day picks others.
+    const chips = [...board.querySelectorAll<HTMLElement>('[data-reasons] .chip')];
+    const sets = [[0, 1], [2, 3], [4], [5, 2, 6], [7, 3]];
+    let si = 0;
+    const pickSet = () => chips.forEach((c, i) => c.classList.toggle('on', sets[si].includes(i)));
+    pickSet();
+    setInterval(() => { if (!visible || document.hidden) return; si = (si + 1) % sets.length; pickSet(); }, 2200);
+
+    // Photos: the caption is written on the print, rubbed out, and written again.
+    const cap = board.querySelector<HTMLElement>('.mini-print figcaption');
+    const caps: string[] = JSON.parse(board.querySelector<HTMLElement>('[data-captions]')?.dataset.captions ?? '[]');
+
     // Borrow a line: one of the app's openers is written, then rubbed out for the next.
     const borrow = board.querySelector<HTMLElement>('[data-borrow]');
     const lines: string[] = borrow ? JSON.parse(borrow.dataset.lines ?? '[]') : [];
     let li = 0;
     const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
     const until = async () => { while (!visible || document.hidden) await wait(300); };
+    (async () => {
+      if (!cap || !caps.length) return;
+      for (let ci = 0; ; ci = (ci + 1) % caps.length) {
+        const text = caps[ci];
+        for (let i = 1; i <= text.length; i++) { await until(); cap.textContent = text.slice(0, i); await wait(70 + Math.random() * 50); }
+        await wait(2600);
+        for (let i = text.length; i >= 0; i--) { await until(); cap.textContent = text.slice(0, i); await wait(22); }
+        await wait(400);
+      }
+    })();
     (async () => {
       if (!borrow || !lines.length) return;
       for (;;) {
@@ -195,22 +239,23 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
 
   /* Desktop: the pieces float in a loose ring around the paragraph. */
   @media (min-width: 64rem) {
-    .board { min-height: 46rem; display: grid; place-items: center; padding: 4rem 0; }
+    .board { min-height: 50rem; display: grid; place-items: center; padding: 4rem 0 8rem; }
     .center { max-width: 34rem; }
     .pieces { position: absolute; inset: 0; display: block; margin: 0; }
     .piece { position: absolute; width: 14rem; }
-    .mood-scale { left: 0; top: 4%; }
-    .borrow { left: 2%; top: 40%; width: 15rem; }
-    .voice { left: 4%; bottom: 4%; }
-    .notice { right: 0; top: 2%; width: 17rem; }
-    .lock { right: 4%; top: 30%; width: 11rem; }
-    .icons { right: 1%; bottom: 22%; width: 12rem; }
-    .deleted { left: 32%; bottom: -2%; width: 15rem; }
-    .lang { right: 22%; bottom: -1%; width: 13rem; }
-    .where { left: 23%; top: -2%; width: 9rem; }
+    .mood-scale { left: 0; top: 2%; }
+    .where { left: 21%; top: -5%; width: 12rem; }
+    .notice { right: 0; top: 0; width: 18rem; }
+    .lock { right: 3%; top: 27%; width: 11rem; }
+    .borrow { left: 0; top: 36%; width: 15rem; }
+    .who { left: 2%; bottom: 4%; width: 13rem; }
+    .photos { right: 1%; bottom: 6%; width: 12rem; }
+    .voice { left: 21%; bottom: -8%; }
+    .reasons { right: 19%; bottom: -8%; width: 17rem; }
+    .lang { left: 41%; bottom: -12%; width: 13rem; }
   }
   @media (max-width: 63.99rem) {
-    .where, .lock { display: none; }
+    .lock { display: none; }
     .piece { width: 86%; }
     .piece:nth-child(even) { justify-self: end; }
   }
@@ -238,29 +283,26 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
   @keyframes talk { to { scale: 1 0.35; } }
   .small { font-size: 0.8125rem; color: var(--ink-2); margin-top: 0.5rem !important; }
 
-  .notice { display: flex; gap: 0.75rem; align-items: center; border-radius: 14px; }
-  .app-icon { flex: none; width: 2.25rem; height: 2.25rem; border-radius: 0.55rem; display: grid; place-items: center; background: #DED5C0; }
-  .app-icon b, .app.mark b, .lock-mark b { width: 60%; height: 60%; border-radius: 50%; border: 1.5px solid #1A1614; display: grid; place-items: center; }
-  .app-icon b::after, .app.mark b::after { content: ''; width: 34%; height: 34%; border-radius: 50%; background: #1A1614; }
-  .notice-head { display: flex; justify-content: space-between; font-size: 0.8125rem; font-weight: 600; }
-  .notice-head span:last-child { font-weight: 400; color: var(--ink-3); }
-  .notice-body { font-size: 0.9375rem; color: var(--ink-2); }
+  /* An iOS notification, as the reminder arrives. */
+  .notice {
+    display: grid; grid-template-columns: auto 1fr auto; column-gap: 0.75rem; row-gap: 0.1rem;
+    align-items: center; padding: 0.75rem 0.875rem; border-radius: 16px;
+  }
+  .app-icon { grid-row: span 2; width: 2.375rem; height: 2.375rem; border-radius: 0.6rem; display: grid; place-items: center; background: #DED5C0; }
+  .app-icon b { width: 60%; height: 60%; border-radius: 50%; border: 1.5px solid #1A1614; display: grid; place-items: center; }
+  .app-icon b::after { content: ''; width: 34%; height: 34%; border-radius: 50%; background: #1A1614; }
+  .notice-app { font-size: 0.875rem; font-weight: 600; align-self: end; }
+  .notice-time { font-size: 0.8125rem; color: var(--ink-2); align-self: end; }
+  .notice-body { grid-column: 2 / -1; font-size: 0.9375rem; color: var(--ink); align-self: start; }
 
   .lock { text-align: center; padding-block: 1.25rem; }
   .lock-mark { display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; }
-  .lock-mark b { width: 100%; height: 100%; border-color: var(--ink); }
+  .lock-mark b { width: 100%; height: 100%; border-radius: 50%; border: 1.5px solid var(--ink); display: grid; place-items: center; }
   .lock-mark b::after { content: ''; width: 30%; height: 30%; border-radius: 50%; background: var(--ink); }
   .lock-word { font-size: 1.125rem; margin: 0.25rem 0 0.75rem !important; }
   .lock-action { font-size: 0.875rem; text-decoration: underline; text-decoration-thickness: var(--hairline); text-underline-offset: 0.2em; }
 
-  .icon-row { display: flex; gap: 0.5rem; }
-  .app { width: 2.5rem; height: 2.5rem; border-radius: 0.6rem; display: grid; place-items: center; background: #DED5C0; color: #1A1614; box-shadow: 0 0 0 0.5px rgba(26, 22, 20, 0.15); }
-  .app.word { font-family: var(--serif); font-size: 0.875rem; }
-  .app.kanji { font-family: var(--serif); font-size: 1.25rem; }
-  .app:nth-child(2) { background: #1A1614; color: #EDE7D9; }
 
-  .deleted-row { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.9375rem; }
-  .gone { color: var(--ink-3); font-family: var(--mono); font-size: 0.6875rem; letter-spacing: 0.06em; text-transform: uppercase; align-self: center; }
 
   .seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 3px; background: var(--paper-sunken); border-radius: 4px; font: 500 0.6875rem/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; }
   .seg span { position: relative; z-index: 1; text-align: center; padding: 0.55rem 0; }
@@ -270,5 +312,35 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
   }
   @keyframes swap { 0%, 40% { translate: 0 0; } 50%, 90% { translate: 100% 0; } 100% { translate: 0 0; } }
 
-  .place { display: flex; align-items: center; gap: 0.5rem; font-size: 1.0625rem; }
+  /* Where: a small paper map of Java and Bali with the pin set down. */
+  .map { position: relative; border-radius: 2px; background: var(--paper-sunken); overflow: hidden; }
+  .map svg { display: block; width: 100%; height: auto; }
+  .land { fill: color-mix(in srgb, var(--ink-3) 28%, var(--paper)); stroke: var(--ink-3); stroke-width: 0.75; }
+  .map-pin { position: absolute; left: 89%; top: 70%; translate: -50% -50%; display: flex; }
+  .place { margin-top: 0.5rem !important; font-size: 1.0625rem; }
+
+  /* Who: the people in a day, as initials. */
+  .faces { display: flex; }
+  .face {
+    width: 2.25rem; height: 2.25rem; margin-right: -0.5rem; border-radius: 50%;
+    display: grid; place-items: center; font-size: 1rem;
+    background: var(--paper-sunken); border: 2px solid var(--paper-raised); color: var(--ink);
+  }
+  .face:nth-child(2) { background: var(--teak-faded); }
+  .names { margin-top: 0.5rem !important; font-size: 0.9375rem; }
+
+  /* Reason: up to three, chosen in teak. */
+  .reason-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .reason-chips .chip {
+    padding: 0.25rem 0.55rem; font-size: 0.8125rem; color: var(--ink-2);
+    border: var(--hairline) solid var(--rule); border-radius: 2px;
+    transition: background-color 260ms ease-out, border-color 260ms ease-out, color 260ms ease-out;
+  }
+  .reason-chips .chip.on { background: var(--paper); color: var(--ink); border-color: var(--teak); }
+  .limit { margin-top: 0.5rem !important; font-size: 0.8125rem; color: var(--ink-2); }
+
+  /* Photos: a print with its caption written in. */
+  .print-wrap { display: flex; justify-content: center; padding: 0.25rem 0 0.25rem; }
+  .print-wrap :global(.mini-print) { width: 9rem; padding: 0.45rem 0.45rem 0; rotate: -3deg; }
+  .print-wrap :global(figcaption) { height: 1.875rem; font-size: 1rem; }
 </style>

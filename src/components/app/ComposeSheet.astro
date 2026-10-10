@@ -3,8 +3,7 @@
 // writer's hand, marks its mood, reasons, people and place, and sets a photo on the stack;
 // then the ink lifts and the page turns to the next day. Every entry's text sits in the DOM
 // (stacked in one grid cell), so the sheet never changes height and no-JS shows the first.
-// Reduce Motion shows the first entry, finished. The sheet is the other paper (inverse):
-// dark on a light page, light on a dark one.
+// Reduce Motion shows the first entry, finished.
 import Icon from './Icon.astro';
 import PlacePin from './PlacePin.astro';
 import Polaroid from '../Polaroid.astro';
@@ -22,7 +21,7 @@ const tilts = [4, -4, 8];
 ---
 <figure class="compose" data-compose data-locale={locales[lang]} data-days={list.map((e) => e.daysAgo).join(',')}
   data-moods={list.map((e) => e.mood).join(',')} data-people={list.map((e) => (e.person ? 1 : 0)).join(',')} role="img" aria-label={`${list[0].title}. ${list[0].body}`}>
-  <div class="sheet inverse" aria-hidden="true">
+  <div class="sheet" aria-hidden="true">
     <p class="label date" data-date>{t.today}</p>
 
     <p class="slot title">

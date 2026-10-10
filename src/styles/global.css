@@ -74,49 +74,6 @@
   :root { --gutter: 2.5rem; }
 }
 
-/* The other paper: a surface in the opposite appearance to the page (the hero's sheet). */
-.inverse {
-  color-scheme: dark;
-  --paper: #161412;
-  --paper-raised: #1E1B18;
-  --paper-sunken: #100E0C;
-  --ink: #EDE7D9;
-  --ink-2: #B5B0A5;
-  --ink-3: #726D62;
-  --rule: #2A2621;
-  --teak: #C08850;
-  --teak-faded: rgba(192, 136, 80, 0.2);
-  --read-weight: 360;
-}
-:root[data-theme="dark"] .inverse {
-  color-scheme: light;
-  --paper: #E8E3D3;
-  --paper-raised: #E2DCC8;
-  --paper-sunken: #DED5C0;
-  --ink: #1A1614;
-  --ink-2: #4A423D;
-  --ink-3: #8A8078;
-  --rule: #C4B99F;
-  --teak: #6B4218;
-  --teak-faded: rgba(139, 94, 46, 0.2);
-  --read-weight: 400;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .inverse {
-    color-scheme: light;
-    --paper: #E8E3D3;
-    --paper-raised: #E2DCC8;
-    --paper-sunken: #DED5C0;
-    --ink: #1A1614;
-    --ink-2: #4A423D;
-    --ink-3: #8A8078;
-    --rule: #C4B99F;
-    --teak: #6B4218;
-    --teak-faded: rgba(139, 94, 46, 0.2);
-    --read-weight: 400;
-  }
-}
-
 *, *::before, *::after { box-sizing: border-box; }
 
 html {

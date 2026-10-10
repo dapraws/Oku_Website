@@ -36,8 +36,8 @@ export const entries: Record<Lang, Entry[]> = {
       scene: 'rain',
     },
     {
-      daysAgo: 3, place: 'Semarang', title: 'Dimsum with Damon',
-      body: 'Walked around Kota Lama until our feet hurt. Damon still can’t decide on a job, and that’s okay. We ordered too much dimsum.',
+      daysAgo: 3, place: 'Yogyakarta', title: 'Dimsum with Damon',
+      body: 'Walked down Malioboro until our feet hurt. Damon still can’t decide on a job, and that’s okay. We ordered too much dimsum.',
       mood: 4, reasons: ['Friends', 'Food', 'Hobbies', 'Self'], picked: [0, 1], person: 'Damon',
       scene: 'cafe',
     },
@@ -56,8 +56,8 @@ export const entries: Record<Lang, Entry[]> = {
       scene: 'rain',
     },
     {
-      daysAgo: 3, place: 'Semarang', title: 'Dimsum sama Damon',
-      body: 'Keliling Kota Lama sampai kaki pegal. Damon masih bingung soal kerjaan, dan itu nggak apa-apa. Kami pesan dimsum kebanyakan.',
+      daysAgo: 3, place: 'Yogyakarta', title: 'Dimsum sama Damon',
+      body: 'Jalan kaki di Malioboro sampai kaki pegal. Damon masih bingung soal kerjaan, dan itu nggak apa-apa. Kami pesan dimsum kebanyakan.',
       mood: 4, reasons: ['Teman', 'Makanan', 'Hobi', 'Diri sendiri'], picked: [0, 1], person: 'Damon',
       scene: 'cafe',
     },

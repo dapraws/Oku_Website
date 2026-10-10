@@ -166,8 +166,7 @@ const year = new Date().getFullYear();
     <div class="dot" data-dot>
       <div class="dot-text">
         <h2 set:html={em(copy.private.title)} />
-        <p>{copy.private.body}</p>
-        <p>{copy.private.maps}</p>
+        <p>{copy.private.body} {copy.private.maps}</p>
         <p><a href={href(lang, 'privacy')}>{copy.private.link}</a></p>
       </div>
     </div>
@@ -231,7 +230,7 @@ const year = new Date().getFullYear();
   }
   // Look back: a dotted teak line from each day to where it happened on the map, drawn as the
   // rows are dealt. Pin positions are measured on the map capture (fractions of the screen).
-  const PINS: Record<string, [number, number]> = { Kuta: [0.848, 0.465], Jakarta: [0.142, 0.366], Semarang: [0.444, 0.396] };
+  const PINS: Record<string, [number, number]> = { Kuta: [0.848, 0.465], Jakarta: [0.142, 0.366], Yogyakarta: [0.441, 0.429] };
   const linkSvg = document.querySelector<SVGSVGElement>('[data-links]');
   const drawLinks = () => {
     const art = linkSvg?.parentElement;
