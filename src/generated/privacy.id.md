@@ -1,6 +1,6 @@
 # Kebijakan Privasi
 
-Terakhir diperbarui: 6 Oktober 2026
+Terakhir diperbarui: 10 Oktober 2026
 
 Oku adalah jurnal yang menyimpan tulisanmu di iPhone-mu. Oku tidak punya akun, server,
 analitik, iklan, maupun pelacakan. Kami tidak mengumpulkan data apa pun tentangmu.

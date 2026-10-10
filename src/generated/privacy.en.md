@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Last updated: 6 October 2026
+Last updated: 10 October 2026
 
 Oku is a journal that keeps your writing on your iPhone. Oku has no accounts, no servers,
 no analytics, no ads and no tracking. We do not collect any data about you.

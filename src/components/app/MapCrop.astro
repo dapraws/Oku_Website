@@ -1,10 +1,27 @@
 ---
 // The real Stories map (Java and Bali with the app's pins), cropped from the app capture.
+// A dark crop (map-bali-dark.webp) is used in dark mode when it exists.
 import { Image } from 'astro:assets';
-import en from '../../assets/screens/en/map-bali.webp';
-import id from '../../assets/screens/id/map-bali.webp';
+import type { ImageMetadata } from 'astro';
 import type { Lang } from '../../i18n';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
+const files = import.meta.glob<{ default: ImageMetadata }>('../../assets/screens/*/map-bali*.webp', { eager: true });
+const light = files[`../../assets/screens/${lang}/map-bali.webp`].default;
+const dark = files[`../../assets/screens/${lang}/map-bali-dark.webp`]?.default;
 ---
-<Image src={lang === 'en' ? en : id} alt="" widths={[280, 560]} sizes="17rem" loading="lazy" />
+<span class:list={['map-crop', { paired: dark }]}>
+  <Image class="light" src={light} alt="" widths={[280, 560]} sizes="17rem" loading="lazy" />
+  {dark && <Image class="dark" src={dark} alt="" widths={[280, 560]} sizes="17rem" loading="lazy" />}
+</span>
+
+<style>
+  .map-crop { display: contents; }
+  .paired .dark { display: none; }
+  :global(:root[data-theme='dark']) .paired .light { display: none; }
+  :global(:root[data-theme='dark']) .paired .dark { display: block; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .paired .light { display: none; }
+    :global(:root:not([data-theme='light'])) .paired .dark { display: block; }
+  }
+</style>

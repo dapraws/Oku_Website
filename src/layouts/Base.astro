@@ -101,8 +101,10 @@ const alternates = (['en', 'id'] as const).map((l) => ({ l, url: new URL(href(l,
         mq.addEventListener('change', label);
         b.addEventListener('click', function () {
           var next = dark() ? 'light' : 'dark';
-          root.dataset.theme = next;
-          try { localStorage.setItem('oku-theme', next); } catch (e) {}
+          // Back to the system's choice: forget the override, so the site follows it again.
+          var system = next === (mq.matches ? 'dark' : 'light');
+          if (system) delete root.dataset.theme; else root.dataset.theme = next;
+          try { system ? localStorage.removeItem('oku-theme') : localStorage.setItem('oku-theme', next); } catch (e) {}
           b.classList.remove('turned'); void b.offsetWidth; b.classList.add('turned');
           label();
         });

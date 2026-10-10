@@ -8,7 +8,7 @@ const OKU = new URL('../../Oku/', import.meta.url);
 const OUT = new URL('../src/generated/', import.meta.url);
 
 // The day each page went live, or last changed. Bump when the text changes.
-const PUBLISHED = { privacy: '2026-10-06', terms: '2026-10-06' };
+const PUBLISHED = { privacy: '2026-10-10', terms: '2026-10-10' };
 
 const formatDate = (iso, locale) =>
   new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })

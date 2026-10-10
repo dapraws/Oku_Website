@@ -10,11 +10,11 @@
     },
     {
       "q": "Can I search my entries?",
-      "a": "Not yet. Search is coming in a later update."
+      "a": "Not yet. For now, scroll back through your days, or find them on the map."
     },
     {
       "q": "Can I export my journal?",
-      "a": "Export is coming in a later update. For now, iCloud sync is the way to keep a copy safe."
+      "a": "Not yet. For now, iCloud sync is the way to keep a copy safe."
     },
     {
       "q": "What does the AI polish do?",
@@ -40,11 +40,11 @@
     },
     {
       "q": "Bisa mencari catatan?",
-      "a": "Belum. Pencarian akan hadir di pembaruan berikutnya."
+      "a": "Belum. Untuk saat ini, telusuri hari-harimu ke belakang, atau temukan lewat peta."
     },
     {
       "q": "Bisa mengekspor jurnalku?",
-      "a": "Ekspor akan hadir di pembaruan berikutnya. Untuk saat ini, sinkronisasi iCloud adalah cara menjaga salinan tetap aman."
+      "a": "Belum. Untuk saat ini, sinkronisasi iCloud adalah cara menjaga salinan tetap aman."
     },
     {
       "q": "Apa fungsi penyuntingan AI?",

@@ -1,6 +1,6 @@
 # Terms of Use
 
-Last updated: 6 October 2026
+Last updated: 10 October 2026
 
 These terms cover your use of Oku, a journal app for iPhone made by Muhammad Darrel
 Prawira ("we").

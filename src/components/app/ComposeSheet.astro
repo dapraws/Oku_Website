@@ -2,7 +2,7 @@
 // The hero: Compose's dot-grid sheet, writing a day, then the next. Each entry types in the
 // writer's hand, marks its mood, reasons, people and place, and sets a photo on the stack;
 // then the ink lifts and the page turns to the next day. Every entry's text sits in the DOM
-// (stacked in one grid cell), so the sheet never changes height and no-JS shows the first.
+// (stacked in one grid cell), so only the Who row changes its height, and no-JS shows the first.
 // Reduce Motion shows the first entry, finished.
 import Icon from './Icon.astro';
 import PlacePin from './PlacePin.astro';
@@ -108,10 +108,6 @@ const tilts = [4, -4, 8];
       const caret = document.createElement('span');
       caret.className = 'caret';
 
-      // Hold the sheet at its tallest (with the Who row), so days without people don't jump.
-      whoRow.hidden = false;
-      sheet.style.minHeight = `${sheet.offsetHeight}px`;
-
       // Run only while the hero is on screen and the tab is visible.
       let onScreen = true;
       new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; }).observe(fig);
@@ -167,7 +163,13 @@ const tilts = [4, -4, 8];
 
       const show = (i: number) => {
         for (const el of fig.querySelectorAll<HTMLElement>('[data-e]')) el.classList.toggle('on', el.dataset.e === String(i));
+        // Days without people drop the Who row; the sheet eases to its new height.
+        const from = sheet.offsetHeight;
         whoRow.hidden = !people[i];
+        const to = sheet.offsetHeight;
+        if (from !== to && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          sheet.animate({ height: [`${from}px`, `${to}px`] }, { duration: 420, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
+        }
         setDate(i);
         fig.setAttribute('aria-label', `${texts.get(typers[i])}. ${texts.get(typers[count + i])}`);
       };

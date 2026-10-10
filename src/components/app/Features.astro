@@ -45,7 +45,7 @@ const t = {
 const parts = t.body.split(/(\[[^\]]+\])/).map((p) => (p.startsWith('[') ? { mark: p.slice(1, -1) } : { text: p }));
 // Reason chips carry a small drawing of what they mean (Phosphor, as in the app).
 const reasonIcons = ['briefcase', 'house', 'usersThree', 'flowerLotus', 'heartbeat', 'bowlFood', 'heart', 'palette'] as const;
-const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.6)));
+const bars = Array.from({ length: 36 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.6)));
 ---
 <div class="board" data-board>
   <div class="center">
@@ -290,8 +290,8 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
   .hand::after { content: ''; display: inline-block; width: 2px; height: 1em; margin-left: 1px; vertical-align: -0.12em; background: var(--teak); animation: blink 1s steps(1) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
 
-  .wave { display: flex; align-items: center; gap: 3px; height: 2rem; }
-  .wave i { flex: 1; height: calc(var(--h) * 100%); background: var(--teak); border-radius: 1px; transform-origin: center; }
+  .wave { display: flex; align-items: center; justify-content: space-between; height: 2rem; }
+  .wave i { width: 1.5px; height: calc(var(--h) * 100%); background: var(--teak); border-radius: 1px; transform-origin: center; }
   @media (prefers-reduced-motion: no-preference) {
     .board.live .wave i { animation: talk 900ms ease-in-out calc(var(--i) * -70ms) infinite alternate; }
   }
@@ -356,9 +356,12 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
   @keyframes ping { 0% { scale: 0.6; opacity: 0; } 25% { opacity: 1; } 100% { scale: 1.8; opacity: 0; } }
   .place { margin-top: 0.5rem !important; font-size: 1.0625rem; }
 
-  /* Who: the people in a day, as initials. */
-  .faces { display: flex; }
-  .faces :global(.person) { width: 4rem; height: 4rem; margin-right: -0.875rem; }
+  /* Who: the people in a day, cut from paper. */
+  .faces { display: flex; padding-left: 0.25rem; }
+  /* They face right, so each lies over the back of the head beside it. */
+  .faces :global(.person) { position: relative; z-index: 3; width: 4rem; height: 4.8rem; margin-right: -0.5rem; rotate: -3deg; }
+  .faces :global(.person:nth-child(2)) { z-index: 2; rotate: 2deg; translate: 0 0.2rem; }
+  .faces :global(.person:nth-child(3)) { z-index: 1; rotate: -1deg; }
   .names { margin-top: 0.5rem !important; font-size: 0.9375rem; }
 
   /* Reason: up to three, chosen in teak. */

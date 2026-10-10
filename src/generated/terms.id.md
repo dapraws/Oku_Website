@@ -1,6 +1,6 @@
 # Ketentuan Penggunaan
 
-Terakhir diperbarui: 6 Oktober 2026
+Terakhir diperbarui: 10 Oktober 2026
 
 Ketentuan ini berlaku untuk pemakaian Oku, aplikasi jurnal untuk iPhone buatan Muhammad
 Darrel Prawira ("kami").
