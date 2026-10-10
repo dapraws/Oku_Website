@@ -1,45 +1,53 @@
 <div align="center">
 
-![Oku](docs/screens/01-hero.jpg)
+![Oku: a quiet place for your days.](public/og-en.png)
 
 # Oku
 
 **A quiet place for your days. The website for a journal for iPhone.**
 
-[Live site](https://oku-journal.pages.dev) · [Bahasa Indonesia](https://oku-journal.pages.dev/id/) · App Store: coming soon
+[Live site](https://oku-journal.pages.dev) · App Store: coming soon
 
 </div>
 
 Oku (奥) is named for the inner, hidden part of a place. You write a line or a page, mark how
 the day felt, and look back on where your days happened. Everything stays on your iPhone.
 This is the site that goes with the app: an introduction, the privacy policy, the terms, and
-support, in English and Bahasa Indonesia.
+support.
 
 <p align="center">
-  <img src="docs/demo.gif" width="70%" alt="The compose sheet writing a day, then the next">
+  <img src="docs/demo.gif" width="100%" alt="The hero: a day written in the compose sheet, then the next">
 </p>
 
 <table>
   <tr>
-    <td width="36%"><img src="docs/screens/02-look-back.jpg" alt="Look back: entries linked to the map"></td>
-    <td width="36%"><img src="docs/screens/03-insights.jpg" alt="Insights: mood, rhythm and reasons"></td>
-    <td width="28%" align="center">
-      <img src="docs/screens/m1-hero.jpg" width="62" alt="Phone: the compose sheet">
-      <img src="docs/screens/m2-insights.jpg" width="62" alt="Phone: insights in dark mode">
-    </td>
+    <td width="50%"><img src="docs/screens/w1-hero.jpg" alt="Hero"></td>
+    <td width="50%"><img src="docs/screens/w2-look-back.jpg" alt="See where your days happened"></td>
   </tr>
   <tr>
-    <td colspan="2"><img src="docs/screens/04-features.jpg" alt="Features as floating pieces, in dark mode"></td>
-    <td><img src="docs/screens/05-privacy.jpg" alt="It stays on your iPhone"></td>
+    <td><img src="docs/screens/w3-insights.jpg" alt="Notice how your days have felt"></td>
+    <td><img src="docs/screens/w4-features.jpg" alt="Write a line or a page"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screens/w5-support.jpg" alt="Support"></td>
+    <td><img src="docs/screens/w6-terms.jpg" alt="Terms of Use"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screens/w7-stays.jpg" alt="It stays on your iPhone"></td>
+    <td><img src="docs/screens/w8-privacy.jpg" alt="Privacy Policy"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="25%"><img src="docs/screens/m1-hero.jpg" alt="Phone: hero"></td>
+    <td width="25%"><img src="docs/screens/m2-sheet.jpg" alt="Phone: the compose sheet"></td>
+    <td width="25%"><img src="docs/screens/m3-insights.jpg" alt="Phone: insights"></td>
+    <td width="25%"><img src="docs/screens/m4-features.jpg" alt="Phone: features"></td>
   </tr>
 </table>
 
 ---
-
-## Made by
-
-**Darrel**, design and code.
-[LinkedIn](https://linkedin.com/in/dapraws) · [GitHub](https://github.com/dapraws)
 
 ## How it's made
 
