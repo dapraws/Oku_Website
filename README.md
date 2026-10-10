@@ -35,17 +35,20 @@ support.
 
 | Technology | What it does here |
 |---|---|
-| **Astro** | Builds every page as static HTML. No client framework. |
-| **CSS scroll-driven animations** | The motion: the dot that grows as you scroll, the rings, the lines drawn to the map. |
-| **Plain TypeScript** | The compose sheet that writes itself, the mood chart and the small pieces that move. |
-| **New York, Source Serif 4, Schoolbell** | Type: New York on Apple devices, Source Serif 4 elsewhere, Schoolbell for the writer's hand. |
+| **Astro 7** | Builds every page to static HTML. No client framework ships to the browser. |
+| **TypeScript** | The small scripts: the compose sheet that writes itself, the mood chart, the theme toggle. |
+| **CSS scroll-driven animations** | The motion as you scroll: the dot that grows into the privacy section, the rings, the lines drawn from each day to the map. |
+| **astro:assets + sharp** | Turns the app captures into WebP at several sizes, so a phone downloads a phone-sized image. |
+| **Fontsource** | Bundles Source Serif 4, the stand-in for New York outside Apple devices, and Schoolbell for the writer's hand. |
 | **Phosphor Icons** | Icons in the regular weight, the same set as the app. |
-| **SVG painting** | The demo photos, painted at build time the way the app paints its sample entries. |
+| **Custom SVG painter** | Paints the demo photos (sunsets, rain, city lights) at build time, ported from the app's sample-entry painter. |
+| **Doc sync script** | Copies the privacy policy, terms and FAQ from the app's repo, so the site and the app always say the same thing. |
 | **Cloudflare Pages** | Hosting. Every push to `main` deploys. |
 
-Light and dark follow the system, with a toggle in the header. Fonts are bundled with the site
-and there are no analytics or trackers, so a visit makes no outside requests. The site is in
-English and Bahasa Indonesia.
+The landing page is 19 KB of HTML gzipped, the fonts are bundled, and there are no analytics or
+trackers, so a visit makes no outside requests. Light and dark follow the system, with a toggle
+in the header. Below 1024px the floating pieces settle into columns, and with Reduce Motion on
+the compose sheet simply shows a finished day.
 
 ## Run locally
 
