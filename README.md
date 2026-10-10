@@ -33,15 +33,19 @@ support.
 
 ## Built with
 
-- **[Astro](https://astro.build)**, fully static. No client framework; the landing's motion
-  is CSS (scroll-driven animations) with a little plain script.
-- **Type:** New York on Apple devices, Source Serif 4 elsewhere, and Schoolbell for the
-  writer's hand.
-- **Icons:** [Phosphor](https://phosphoricons.com), regular weight, as in the app.
-- **Light and dark** follow the system, with a toggle in the header.
-- The demo photos are painted as SVG at build time, the same way the app paints its sample
-  entries.
-- Hosted on **Cloudflare Pages**; every push to `main` deploys.
+| Technology | What it does here |
+|---|---|
+| **Astro** | Builds every page as static HTML. No client framework. |
+| **CSS scroll-driven animations** | The motion: the dot that grows as you scroll, the rings, the lines drawn to the map. |
+| **Plain TypeScript** | The compose sheet that writes itself, the mood chart and the small pieces that move. |
+| **New York, Source Serif 4, Schoolbell** | Type: New York on Apple devices, Source Serif 4 elsewhere, Schoolbell for the writer's hand. |
+| **Phosphor Icons** | Icons in the regular weight, the same set as the app. |
+| **SVG painting** | The demo photos, painted at build time the way the app paints its sample entries. |
+| **Cloudflare Pages** | Hosting. Every push to `main` deploys. |
+
+Light and dark follow the system, with a toggle in the header. Fonts are bundled with the site
+and there are no analytics or trackers, so a visit makes no outside requests. The site is in
+English and Bahasa Indonesia.
 
 ## Run locally
 
