@@ -31,7 +31,7 @@ support.
 
 ---
 
-## How it's made
+## Built with
 
 - **[Astro](https://astro.build)**, fully static. No client framework; the landing's motion
   is CSS (scroll-driven animations) with a little plain script.
