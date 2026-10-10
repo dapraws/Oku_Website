@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://oku-journal.pages.dev/sitemap.xml

@@ -15,6 +15,7 @@ export const chrome = {
     copyright: '© 2026 Muhammad Darrel Prawira',
     tagline: 'A quiet place for your days.',
     toDark: 'Switch to dark', toLight: 'Switch to light',
+    ogAlt: 'The Oku app icon beside the line: A quiet place for your days.',
   },
   id: {
     other: 'en',
@@ -27,6 +28,7 @@ export const chrome = {
     copyright: '© 2026 Muhammad Darrel Prawira',
     tagline: 'Ruang tenang untuk harimu.',
     toDark: 'Ganti ke mode gelap', toLight: 'Ganti ke mode terang',
+    ogAlt: 'Ikon aplikasi Oku di samping kalimat: Ruang tenang untuk harimu.',
   },
 } as const;
 
