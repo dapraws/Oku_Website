@@ -35,20 +35,15 @@ support.
 
 | Technology | What it does here |
 |---|---|
-| **Astro 7** | Builds every page to static HTML. No client framework ships to the browser. |
-| **TypeScript** | The small scripts: the compose sheet that writes itself, the mood chart, the theme toggle. |
-| **CSS scroll-driven animations** | The motion as you scroll: the dot that grows into the privacy section, the rings, the lines drawn from each day to the map. |
-| **astro:assets + sharp** | Turns the app captures into WebP at several sizes, so a phone downloads a phone-sized image. |
-| **Fontsource** | Bundles Source Serif 4, the stand-in for New York outside Apple devices, and Schoolbell for the writer's hand. |
-| **Phosphor Icons** | Icons in the regular weight, the same set as the app. |
-| **Custom SVG painter** | Paints the demo photos (sunsets, rain, city lights) at build time, ported from the app's sample-entry painter. |
-| **Doc sync script** | Copies the privacy policy, terms and FAQ from the app's repo, so the site and the app always say the same thing. |
-| **Cloudflare Pages** | Hosting. Every push to `main` deploys. |
+| **Astro 7 + TypeScript** | Static pages and the small scripts behind them. |
+| **CSS** | Styling and the scroll animations, with no framework. |
+| **Fontsource** | Source Serif 4 and Schoolbell, bundled with the site. |
+| **Phosphor Icons** | Icons, the same set as the app. |
+| **sharp** | App screenshots resized to WebP. |
+| **Cloudflare Pages** | Hosting. |
 
-The landing page is 19 KB of HTML gzipped, the fonts are bundled, and there are no analytics or
-trackers, so a visit makes no outside requests. Light and dark follow the system, with a toggle
-in the header. Below 1024px the floating pieces settle into columns, and with Reduce Motion on
-the compose sheet simply shows a finished day.
+The demo photos are painted as SVG at build time, and the privacy policy, terms and FAQ are
+synced from the app's repo. No analytics, no trackers, no outside requests.
 
 ## Run locally
 
