@@ -21,30 +21,12 @@ support.
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screens/w1-hero.jpg" alt="Hero"></td>
-    <td width="50%"><img src="docs/screens/w2-look-back.jpg" alt="See where your days happened"></td>
+    <td width="50%" rowspan="4" valign="top"><img src="docs/screens/phone.jpg" alt="On a phone: the hero and the compose sheet"></td>
+    <td width="50%"><img src="docs/screens/w1-hero.jpg" alt="A quiet place for your days"></td>
   </tr>
-  <tr>
-    <td><img src="docs/screens/w3-insights.jpg" alt="Notice how your days have felt"></td>
-    <td><img src="docs/screens/w4-features.jpg" alt="Write a line or a page"></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screens/w5-support.jpg" alt="Support"></td>
-    <td><img src="docs/screens/w6-terms.jpg" alt="Terms of Use"></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screens/w7-stays.jpg" alt="It stays on your iPhone"></td>
-    <td><img src="docs/screens/w8-privacy.jpg" alt="Privacy Policy"></td>
-  </tr>
-</table>
-
-<table>
-  <tr>
-    <td width="25%"><img src="docs/screens/m1-hero.jpg" alt="Phone: hero"></td>
-    <td width="25%"><img src="docs/screens/m2-sheet.jpg" alt="Phone: the compose sheet"></td>
-    <td width="25%"><img src="docs/screens/m3-insights.jpg" alt="Phone: insights"></td>
-    <td width="25%"><img src="docs/screens/m4-features.jpg" alt="Phone: features"></td>
-  </tr>
+  <tr><td><img src="docs/screens/w2-look-back.jpg" alt="See where your days happened"></td></tr>
+  <tr><td><img src="docs/screens/w3-insights.jpg" alt="Notice how your days have felt"></td></tr>
+  <tr><td><img src="docs/screens/w4-features.jpg" alt="Write a line or a page"></td></tr>
 </table>
 
 ---
