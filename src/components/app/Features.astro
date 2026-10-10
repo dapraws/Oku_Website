@@ -139,7 +139,7 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
 
     <div class="piece where" style="--d: 9.4s; --o: -2.2s; --r: -2deg">
       <p class="label"><Icon name="mapPin" size={14} />{t.where}</p>
-      <div class="map"><Screenshot lang={lang} /></div>
+      <div class="map"><Screenshot lang={lang} /><span class="ping"></span></div>
       <p class="place">Kuta</p>
     </div>
   </div>
@@ -255,7 +255,7 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
     .piece { position: absolute; width: 14rem; }
     /* Two loose columns beside the paragraph, a few pieces above and below it. */
     .mood-scale { left: 1%; top: 6%; }
-    .where { left: 3%; top: 36%; width: 15rem; }
+    .where { left: 2%; top: 34%; width: 17rem; }
     .borrow { left: 0; bottom: 8%; width: 15rem; }
     .notice { right: 0; top: 4%; width: 18rem; }
     .lock { right: 5%; top: 33%; width: 11rem; }
@@ -265,9 +265,14 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
     .who { left: 25%; bottom: -5%; width: 14rem; }
     .reasons { right: 22%; bottom: -8%; width: 19rem; }
   }
-  @media (max-width: 63.99rem) {
+  @media (max-width: 39.99rem) {
     .piece { width: 86%; }
     .piece:nth-child(even) { justify-self: end; }
+  }
+  /* Tablets: two staggered columns, slips at their natural size. */
+  @media (min-width: 40rem) and (max-width: 63.99rem) {
+    .pieces { grid-template-columns: repeat(2, minmax(0, 20rem)); justify-content: center; gap: 1.25rem 1.5rem; align-items: start; }
+    .piece:nth-child(even) { margin-top: 2.5rem; }
   }
 
   /* Feeling scale */
@@ -341,8 +346,14 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
   @keyframes swap { 0%, 40% { translate: 0 0; } 50%, 90% { translate: 100% 0; } 100% { translate: 0 0; } }
 
   /* Where: a small paper map of Java and Bali with the pin set down. */
-  .map { position: relative; border-radius: 2px; background: var(--paper-sunken); overflow: hidden; }
+  .map { position: relative; border-radius: 4px; background: var(--paper-sunken); overflow: hidden; box-shadow: 0 0 0 0.5px var(--rule); }
   .map :global(img) { display: block; width: 100%; height: auto; }
+  /* The Kuta pin on the map (measured on the capture), marked with a teak ring. */
+  .ping { position: absolute; left: 87.9%; top: 64.4%; width: 1.75rem; height: 1.75rem; margin: -0.875rem 0 0 -0.875rem; border-radius: 50%; border: 2px solid var(--teak); }
+  @media (prefers-reduced-motion: no-preference) {
+    .board.live .ping { animation: ping 2.4s ease-out infinite; }
+  }
+  @keyframes ping { 0% { scale: 0.6; opacity: 0; } 25% { opacity: 1; } 100% { scale: 1.8; opacity: 0; } }
   .place { margin-top: 0.5rem !important; font-size: 1.0625rem; }
 
   /* Who: the people in a day, as initials. */
