@@ -1,31 +1,45 @@
-<a href="https://oku-journal.pages.dev">
-  <img src="public/og-en.png" alt="Oku: a quiet place for your days." width="100%">
-</a>
+<div align="center">
+
+![Oku](docs/screens/01-hero.jpg)
+
+# Oku
+
+**A quiet place for your days. The website for a journal for iPhone.**
+
+[Live site](https://oku-journal.pages.dev) · [Bahasa Indonesia](https://oku-journal.pages.dev/id/) · App Store: coming soon
+
+</div>
+
+Oku (奥) is named for the inner, hidden part of a place. You write a line or a page, mark how
+the day felt, and look back on where your days happened. Everything stays on your iPhone.
+This is the site that goes with the app: an introduction, the privacy policy, the terms, and
+support, in English and Bahasa Indonesia.
 
 <p align="center">
-  <b>The website for Oku, a quiet journal for iPhone.</b><br>
-  <a href="https://oku-journal.pages.dev">oku-journal.pages.dev</a>
-  &nbsp;·&nbsp;
-  <a href="https://oku-journal.pages.dev/id/">Bahasa Indonesia</a>
-  &nbsp;·&nbsp;
-  App Store: coming soon
+  <img src="docs/demo.gif" width="70%" alt="The compose sheet writing a day, then the next">
 </p>
+
+<table>
+  <tr>
+    <td width="36%"><img src="docs/screens/02-look-back.jpg" alt="Look back: entries linked to the map"></td>
+    <td width="36%"><img src="docs/screens/03-insights.jpg" alt="Insights: mood, rhythm and reasons"></td>
+    <td width="28%" align="center">
+      <img src="docs/screens/m1-hero.jpg" width="62" alt="Phone: the compose sheet">
+      <img src="docs/screens/m2-insights.jpg" width="62" alt="Phone: insights in dark mode">
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screens/04-features.jpg" alt="Features as floating pieces, in dark mode"></td>
+    <td><img src="docs/screens/05-privacy.jpg" alt="It stays on your iPhone"></td>
+  </tr>
+</table>
 
 ---
 
-Oku (奥) means *inward*. You write a line or a page, mark how the day felt, and look back
-on where your days happened. Everything stays on your iPhone.
+## Made by
 
-This repo is the small site around the app: a landing page, the privacy policy, the terms,
-and a support page with the FAQ. It comes in English at the root and Bahasa Indonesia
-under `/id/`.
-
-| Page | English | Indonesia |
-| --- | --- | --- |
-| Landing | [`/`](https://oku-journal.pages.dev/) | [`/id/`](https://oku-journal.pages.dev/id/) |
-| Privacy | [`/privacy`](https://oku-journal.pages.dev/privacy) | [`/id/privacy`](https://oku-journal.pages.dev/id/privacy) |
-| Terms | [`/terms`](https://oku-journal.pages.dev/terms) | [`/id/terms`](https://oku-journal.pages.dev/id/terms) |
-| Support | [`/support`](https://oku-journal.pages.dev/support) | [`/id/support`](https://oku-journal.pages.dev/id/support) |
+**Darrel**, design and code.
+[LinkedIn](https://linkedin.com/in/dapraws) · [GitHub](https://github.com/dapraws)
 
 ## How it's made
 
@@ -35,44 +49,15 @@ under `/id/`.
   writer's hand.
 - **Icons:** [Phosphor](https://phosphoricons.com), regular weight, as in the app.
 - **Light and dark** follow the system, with a toggle in the header.
-- The demo photos are painted as SVG at build time (`src/paint.ts`), the same way the app
-  paints its sample entries.
+- The demo photos are painted as SVG at build time, the same way the app paints its sample
+  entries.
 - Hosted on **Cloudflare Pages**; every push to `main` deploys.
 
-## Run it
-
-Needs Node 22.
+## Run locally
 
 ```bash
 npm install
-npm run dev      # http://localhost:4321
-npm run build    # static site in dist/
-```
-
-## Where the words come from
-
-The privacy policy, the terms and the FAQ live in the app's repo, which stays the source of
-truth. `npm run sync` copies them into `src/generated/`, which is committed, so the build
-never needs the app repo.
-
-```bash
-npm run sync     # needs ../Oku next to this folder
-```
-
-Change the text in the app repo first, sync, then commit here. Bump the dates in
-`scripts/sync-docs.mjs` when a policy changes.
-
-## Layout
-
-```
-src/
-  pages/          one file per route; id/ holds the Indonesian ones
-  components/     Landing, Support, the phone frame, the badge
-  components/app/ pieces of the app rebuilt in HTML: the compose sheet, insights, features
-  entries.ts      the three example days on the landing
-  i18n.ts         shared strings and the App Store switch
-  generated/      synced privacy, terms and FAQ (do not edit)
-public/           favicon, share images, sitemap, robots
+npm run dev
 ```
 
 ---
