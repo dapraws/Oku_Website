@@ -39,7 +39,6 @@ support.
 | **CSS** | Styling and the scroll animations, with no framework. |
 | **Fontsource** | Source Serif 4 and Schoolbell, bundled with the site. |
 | **Phosphor Icons** | Icons, the same set as the app. |
-| **sharp** | App screenshots resized to WebP. |
 | **Cloudflare Pages** | Hosting. |
 
 The demo photos are painted as SVG at build time, and the privacy policy, terms and FAQ are
