@@ -1,16 +1,17 @@
 ---
-// The landing page, "Inward". The hero writes a few days, the page looks back on them, Insights
-// can be tried, every ring is centred on the ink dot that holds privacy, and "Also in Oku" is the
-// app's own Settings screen. One real screen (the map) stays as proof.
+// The landing page, "Inward". The hero writes a few days, the page looks back on them (each tied to
+// its pin on the map), Insights can be tried, pieces of the app float around the writing features,
+// and every ring is centred on the ink dot that holds privacy. One real screen (the map) is proof.
 // Copy: STORE.md, plus lines approved with Darrel (2026-10-07, 2026-10-10).
 import Phone from './Phone.astro';
 import ComposeSheet from './app/ComposeSheet.astro';
 import EntryRow from './app/EntryRow.astro';
 import Insights from './app/Insights.astro';
 import Painting from './app/Painting.astro';
-import Settings from './app/Settings.astro';
+import Features from './app/Features.astro';
+import AppStoreBadge from './AppStoreBadge.astro';
 import { entries, moods, locales } from '../entries';
-import { href, type Lang } from '../i18n';
+import { chrome, href, type Lang } from '../i18n';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -20,7 +21,6 @@ const copy = {
     headline: 'A quiet place for *your days.*',
     lead: 'Write about your day. Everything you write stays with you.',
     kanji: 'Named from Japanese 奥 — the inner, hidden interior of a place.',
-    note: 'how the day felt',
     write: {
       title: 'Write a line *or a page.*',
       body: 'Mark how the day felt in one word, from Heavy to Bright, and pick up to three reasons why. Add the place, the people who were there, and a few photos, which Oku keeps as polaroids. If you don’t know how to start, borrow a line and keep going. Missed a day? Write it under its own date.',
@@ -44,13 +44,12 @@ const copy = {
       maps: 'Looking up a place uses Apple Maps.',
       link: 'Read the privacy policy',
     },
-    also: { title: 'Also in *Oku*', note: 'AI features need a device that supports Apple Intelligence.' },
+    also: { note: 'AI features need a device that supports Apple Intelligence.' },
   },
   id: {
     headline: 'Ruang tenang untuk *harimu.*',
     lead: 'Tulis tentang harimu. Semua yang kamu tulis tetap bersamamu.',
     kanji: 'Diambil dari kanji 奥 — bagian dalam sebuah tempat yang tersembunyi.',
-    note: 'rasanya hari ini',
     write: {
       title: 'Satu baris *atau satu halaman.*',
       body: 'Tandai perasaanmu hari itu dengan satu kata, dari Berat sampai Cerah, lalu pilih sampai tiga alasannya. Tambahkan tempat, orang-orang yang ada di sana, dan beberapa foto yang disimpan Oku sebagai polaroid. Bingung mulai dari mana? Pinjam satu kalimat, lalu lanjutkan. Ada hari yang terlewat? Tulis di tanggalnya sendiri.',
@@ -74,7 +73,7 @@ const copy = {
       maps: 'Mencari tempat memakai Apple Maps.',
       link: 'Baca kebijakan privasi',
     },
-    also: { title: 'Juga di *Oku*', note: 'Fitur AI membutuhkan perangkat yang mendukung Apple Intelligence.' },
+    also: { note: 'Fitur AI membutuhkan perangkat yang mendukung Apple Intelligence.' },
   },
 }[lang];
 
@@ -91,8 +90,6 @@ const words = copy.headline.split(' ').map((raw) => {
   if (closes) inEm = false;
   return { text, italic };
 });
-// The write paragraph inks in word by word as it scrolls past.
-const writeWords = copy.write.body.split(' ');
 const list = entries[lang];
 const year = new Date().getFullYear();
 ---
@@ -106,16 +103,13 @@ const year = new Date().getFullYear();
       </h1>
       <p class="lead">{copy.lead}</p>
       <p class="kanji">{copy.kanji}</p>
+      <AppStoreBadge lang={lang} class="hero-badge" />
     </div>
     <div class="hero-sheet">
-      <ComposeSheet lang={lang} note={copy.note} />
+      <ComposeSheet lang={lang} />
     </div>
   </section>
 
-  <section class="write" data-ring>
-    <h2 set:html={em(copy.write.title)} />
-    <p class="inking">{writeWords.map((w) => <span class="w">{w} </span>)}</p>
-  </section>
 
   <section class="back" data-ring>
     <div class="back-text">
@@ -124,6 +118,7 @@ const year = new Date().getFullYear();
     </div>
     <div class="back-art" data-back>
       <Phone lang={lang} name="04-map" alt={copy.back.mapAlt} class="map" />
+      <svg class="links" aria-hidden="true" data-links></svg>
       <div class="slips" aria-hidden="true">
         <!-- On This Day: Teak Wash, as on Home. The year rolls back when it comes into view. -->
         <div class="slip otd" data-locale={locales[lang]}>
@@ -144,7 +139,7 @@ const year = new Date().getFullYear();
         <div class="slip rows">
           <p class="label rows-head">{copy.back.entries}</p>
           {list.map((e, i) => (
-            <div class="deal" style={`--d: ${i}`}>
+            <div class="deal" style={`--d: ${i}`} data-pin={e.place}>
               <EntryRow scene={e.scene} daysAgo={e.daysAgo} place={e.place} meta={e.place}
                 title={e.title} excerpt={e.body} mood={moods[lang][e.mood]} person={e.person} />
             </div>
@@ -163,6 +158,10 @@ const year = new Date().getFullYear();
     <Insights lang={lang} label={copy.felt.label} />
   </section>
 
+  <section class="features" data-ring>
+    <Features lang={lang} title={em(copy.write.title)} note={copy.also.note} />
+  </section>
+
   <section class="dot-wrap">
     <div class="dot" data-dot>
       <div class="dot-text">
@@ -174,11 +173,12 @@ const year = new Date().getFullYear();
     </div>
   </section>
 
-  <section class="also">
-    <h2 set:html={em(copy.also.title)} />
-    <Settings lang={lang} />
-    <p class="also-note">{copy.also.note}</p>
+  <section class="closing">
+    <p class="closing-word">Oku</p>
+    <p class="closing-line">{chrome[lang].tagline}</p>
+    <AppStoreBadge lang={lang} />
   </section>
+
 </div>
 
 <script>
@@ -229,6 +229,38 @@ const year = new Date().getFullYear();
       meta.textContent = `${short(d)} · ${meta.dataset.place}`;
     }
   }
+  // Look back: a dotted teak line from each day to where it happened on the map, drawn as the
+  // rows are dealt. Pin positions are measured on the map capture (fractions of the screen).
+  const PINS: Record<string, [number, number]> = { Kuta: [0.848, 0.465], Jakarta: [0.142, 0.366], Semarang: [0.444, 0.396] };
+  const linkSvg = document.querySelector<SVGSVGElement>('[data-links]');
+  const drawLinks = () => {
+    const art = linkSvg?.parentElement;
+    const screen = art?.querySelector<HTMLElement>('.phone-screen');
+    if (!linkSvg || !art || !screen || innerWidth < 1024) { linkSvg?.replaceChildren(); return; }
+    const a = art.getBoundingClientRect(), sc = screen.getBoundingClientRect();
+    linkSvg.setAttribute('viewBox', `0 0 ${a.width} ${a.height}`);
+    const ns = 'http://www.w3.org/2000/svg';
+    const out: SVGElement[] = [];
+    art.querySelectorAll<HTMLElement>('[data-pin]').forEach((row, n) => {
+      const pin = PINS[row.dataset.pin ?? ''];
+      if (!pin) return;
+      const r = row.getBoundingClientRect();
+      const x1 = r.right - a.left - 8, y1 = r.top + r.height / 2 - a.top;
+      const x2 = sc.left - a.left + pin[0] * sc.width, y2 = sc.top - a.top + pin[1] * sc.height;
+      const path = document.createElementNS(ns, 'path');
+      const mx = (x1 + x2) / 2;
+      path.setAttribute('d', `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`);
+      path.setAttribute('pathLength', '1');
+      path.style.setProperty('--d', String(n));
+      const ring = document.createElementNS(ns, 'circle');
+      ring.setAttribute('cx', String(x2)); ring.setAttribute('cy', String(y2)); ring.setAttribute('r', '9');
+      ring.style.setProperty('--d', String(n));
+      out.push(path, ring);
+    });
+    linkSvg.replaceChildren(...out);
+  };
+  addEventListener('resize', drawLinks);
+
   const back = document.querySelector<HTMLElement>('[data-back]');
   if (back && !matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
     back.classList.add('waiting');
@@ -236,6 +268,8 @@ const year = new Date().getFullYear();
       if (!e.isIntersecting) return;
       io.disconnect();
       back.classList.replace('waiting', 'shown');
+      // Rows settle (rotated slips), then the lines can be measured.
+      setTimeout(drawLinks, 50);
     }, { threshold: 0.35 });
     io.observe(back);
   }
@@ -294,27 +328,9 @@ const year = new Date().getFullYear();
   h1 .em { color: var(--teak); letter-spacing: -0.02em; }
   .lead { font-size: clamp(1.1875rem, 1.05rem + 0.5vw, 1.4375rem); line-height: 1.4; max-width: 26rem; margin-bottom: 1.5rem; }
   .kanji { font-size: 0.9375rem; color: var(--ink-2); max-width: 22rem; }
+  .hero-text :global(.hero-badge) { margin-top: 2rem; }
   .hero-sheet { padding-bottom: 4rem; }
 
-  /* An editorial beat: the paragraph inks in as it passes, word by word. */
-  .write {
-    max-width: 46rem;
-    margin: 0 auto;
-    padding: clamp(5rem, 14vh, 9rem) 0;
-    text-align: center;
-  }
-  .write p { font-size: clamp(1.25rem, 1rem + 0.9vw, 1.6875rem); line-height: 1.5; }
-  @media (prefers-reduced-motion: no-preference) {
-    @supports (animation-timeline: view()) {
-      .w {
-        color: var(--ink-3);
-        animation: ink linear both;
-        animation-timeline: view();
-        animation-range: entry 85% cover 55%;
-      }
-    }
-  }
-  @keyframes ink { to { color: var(--ink); } }
 
   /* Look back: the one real screen, with slips laid against it */
   .back { display: grid; gap: 3rem; padding: clamp(5rem, 12vh, 8rem) 0; }
@@ -352,9 +368,21 @@ const year = new Date().getFullYear();
     .back { grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr); align-items: center; gap: 3rem; }
     /* Slips laid against the phone's left edge, overlapping it a little. */
     .back-art { grid-template-columns: minmax(0, 1fr) auto; align-items: end; justify-items: stretch; gap: 0; }
-    .slips { grid-area: 1 / 1; position: relative; z-index: 1; width: auto; margin: 0 -2.5rem 3rem 0; rotate: -1.5deg; }
+    .slips { grid-area: 1 / 1; position: relative; z-index: 1; width: auto; margin: 0 3rem 3rem 0; rotate: -1.5deg; }
     .back-art :global(.map) { grid-area: 1 / 2; width: 18.5rem; }
   }
+
+  /* The lines from each day to its pin */
+  .links { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; overflow: visible; }
+  .links :global(path) { fill: none; stroke: var(--teak); stroke-width: 1.5; stroke-dasharray: 0.012 0.012; stroke-linecap: round; }
+  .links :global(circle) { fill: none; stroke: var(--teak); stroke-width: 1.5; }
+  @media (prefers-reduced-motion: no-preference) {
+    .links :global(path) { animation: link-draw 900ms var(--ease) both; animation-delay: calc(var(--d) * 140ms + 500ms); }
+    .links :global(circle) { animation: pin-pulse 1.2s ease-out both; animation-delay: calc(var(--d) * 140ms + 1300ms); transform-box: fill-box; transform-origin: center; }
+  }
+  @keyframes link-draw { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes pin-pulse { 0% { scale: 0.3; opacity: 0; } 30% { opacity: 1; } 100% { scale: 1.6; opacity: 0; } }
+  .back-art { position: relative; }
 
   /* How the days felt */
   .felt { padding: clamp(5rem, 12vh, 8rem) 0; display: grid; gap: 2.5rem; }
@@ -398,8 +426,12 @@ const year = new Date().getFullYear();
   @keyframes arrive { from { opacity: 0; filter: blur(4px); } }
   @keyframes close-in { to { scale: 0.86; } }
 
-  /* Back out on the paper: the app's Settings */
-  .also { padding: 2rem 0 4rem; }
-  .also h2 { font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem); text-align: center; margin-bottom: 2rem; }
-  .also-note { font-size: 0.9375rem; color: var(--ink-2); text-align: center; margin-top: 2rem; }
+  /* Writing, and the rest of Oku, floating */
+  .features { padding: clamp(5rem, 12vh, 8rem) 0; }
+
+  /* Back out on the paper */
+  .closing { display: grid; justify-items: center; text-align: center; gap: 0.75rem; padding: 1rem 0 5rem; }
+  .closing-word { font-size: clamp(3rem, 2rem + 4vw, 5rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+  .closing-line { font-size: 1.25rem; color: var(--ink-2); margin-bottom: 1.25rem; }
+
 </style>

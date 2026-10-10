@@ -14,7 +14,6 @@ export type Entry = {
   picked: number[]; // indexes into reasons
   person?: string;
   scene: Scene;
-  caption: string;
 };
 
 export const moods: Record<Lang, string[]> = {
@@ -28,19 +27,19 @@ export const entries: Record<Lang, Entry[]> = {
       daysAgo: 0, place: 'Kuta', title: 'Suddenly quiet',
       body: 'I felt calm today. Honestly, it feels a little strange. After so long with my heart in pieces, tired from pretending to be strong all the time, today everything suddenly went quiet.',
       mood: 2, reasons: ['Work', 'Family', 'Self', 'Health'], picked: [2, 3],
-      scene: 'sunset', caption: 'golden hour',
+      scene: 'sunset',
     },
     {
       daysAgo: 1, place: 'Jakarta', title: 'Rain on the way home',
       body: 'Stuck in traffic for an hour. The rain made the city look softer than it is. Called Mum and we talked about nothing.',
       mood: 3, reasons: ['Work', 'Family', 'Friends', 'Money'], picked: [0, 1], person: 'Mum',
-      scene: 'rain', caption: 'rain again',
+      scene: 'rain',
     },
     {
       daysAgo: 3, place: 'Semarang', title: 'Dimsum with Damon',
       body: 'Walked around Kota Lama until our feet hurt. Damon still can’t decide on a job, and that’s okay. We ordered too much dimsum.',
       mood: 4, reasons: ['Friends', 'Food', 'Hobbies', 'Self'], picked: [0, 1], person: 'Damon',
-      scene: 'cafe', caption: 'table by the window',
+      scene: 'cafe',
     },
   ],
   id: [
@@ -48,19 +47,19 @@ export const entries: Record<Lang, Entry[]> = {
       daysAgo: 0, place: 'Kuta', title: 'Hari yang hening',
       body: 'Aku merasa tenang hari ini. Tapi jujur, rasanya agak asing untukku. Setelah sekian lama hati ini rasanya berantakan dan capek banget karena terus-terusan pura-pura kuat, hari ini mendadak semuanya hening.',
       mood: 2, reasons: ['Kerja', 'Keluarga', 'Diri sendiri', 'Kesehatan'], picked: [2, 3],
-      scene: 'sunset', caption: 'jam emas',
+      scene: 'sunset',
     },
     {
       daysAgo: 1, place: 'Jakarta', title: 'Hujan di jalan pulang',
       body: 'Terjebak macet sejam. Hujan bikin kota kelihatan lebih lembut dari aslinya. Telepon Ibu, ngobrol hal-hal kecil.',
       mood: 3, reasons: ['Kerja', 'Keluarga', 'Teman', 'Uang'], picked: [0, 1], person: 'Ibu',
-      scene: 'rain', caption: 'hujan lagi',
+      scene: 'rain',
     },
     {
       daysAgo: 3, place: 'Semarang', title: 'Dimsum sama Damon',
       body: 'Keliling Kota Lama sampai kaki pegal. Damon masih bingung soal kerjaan, dan itu nggak apa-apa. Kami pesan dimsum kebanyakan.',
       mood: 4, reasons: ['Teman', 'Makanan', 'Hobi', 'Diri sendiri'], picked: [0, 1], person: 'Damon',
-      scene: 'cafe', caption: 'meja dekat jendela',
+      scene: 'cafe',
     },
   ],
 };

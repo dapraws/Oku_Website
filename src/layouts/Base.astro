@@ -48,6 +48,13 @@ const alternates = (['en', 'id'] as const).map((l) => ({ l, url: new URL(href(l,
       <nav class="nav">
         <a class="label" href={href(lang, 'support')} aria-current={page === 'support' ? 'page' : undefined}>{t.support}</a>
         <a class="label" href={href(other, page)} hreflang={other} lang={other}>{t.otherName}</a>
+        <!-- Theme: the mark turns over. Light page: ring and dot. Dark page: a full disc. -->
+        <button type="button" class="theme" data-theme-toggle data-to-dark={t.toDark} data-to-light={t.toLight} aria-label={t.toDark} title={t.toDark}>
+          <svg width="22" height="22" viewBox="0 0 40 40" aria-hidden="true">
+            <circle class="disc" cx="20" cy="20" r="14" />
+            <circle class="core" cx="20" cy="20" r="4" />
+          </svg>
+        </button>
       </nav>
     </header>
 
@@ -63,6 +70,24 @@ const alternates = (['en', 'id'] as const).map((l) => ({ l, url: new URL(href(l,
       </nav>
       <p class="label">{t.copyright}</p>
     </footer>
+    <script is:inline>
+      (function () {
+        var b = document.querySelector('[data-theme-toggle]');
+        if (!b) return;
+        var root = document.documentElement, mq = matchMedia('(prefers-color-scheme: dark)');
+        var dark = function () { return root.dataset.theme ? root.dataset.theme === 'dark' : mq.matches; };
+        var label = function () { var l = dark() ? b.dataset.toLight : b.dataset.toDark; b.setAttribute('aria-label', l); b.title = l; };
+        label();
+        mq.addEventListener('change', label);
+        b.addEventListener('click', function () {
+          var next = dark() ? 'light' : 'dark';
+          root.dataset.theme = next;
+          try { localStorage.setItem('oku-theme', next); } catch (e) {}
+          b.classList.remove('turned'); void b.offsetWidth; b.classList.add('turned');
+          label();
+        });
+      })();
+    </script>
   </body>
 </html>
 
@@ -93,7 +118,23 @@ const alternates = (['en', 'id'] as const).map((l) => ({ l, url: new URL(href(l,
   }
   .wordmark { font-size: 1.375rem; font-weight: 500; line-height: 1; }
 
-  .nav { display: flex; gap: 1.5rem; }
+  .nav { display: flex; align-items: center; gap: 1.5rem; }
+  .theme {
+    display: inline-grid; place-items: center;
+    width: 44px; height: 44px; margin-right: -11px;
+    border: 0; background: none; cursor: pointer; color: var(--ink);
+  }
+  .theme .disc { fill: transparent; stroke: currentColor; stroke-width: 1.6; transition: fill 320ms ease-out; }
+  .theme .core { fill: currentColor; transition: fill 320ms ease-out; }
+  :global(:root[data-theme='dark']) .theme .disc { fill: var(--ink); }
+  :global(:root[data-theme='dark']) .theme .core { fill: var(--paper); }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .theme .disc { fill: var(--ink); }
+    :global(:root:not([data-theme='light'])) .theme .core { fill: var(--paper); }
+  }
+  .theme.turned svg { animation: bloom 320ms ease-out; }
+  .theme:hover svg { scale: 1.08; }
+  .theme svg { transition: scale 200ms ease-out; }
   .nav a {
     position: relative;
     display: inline-flex;

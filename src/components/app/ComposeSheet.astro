@@ -3,25 +3,26 @@
 // writer's hand, marks its mood, reasons, people and place, and sets a photo on the stack;
 // then the ink lifts and the page turns to the next day. Every entry's text sits in the DOM
 // (stacked in one grid cell), so the sheet never changes height and no-JS shows the first.
-// Reduce Motion shows the first entry, finished.
+// Reduce Motion shows the first entry, finished. The sheet is the other paper (inverse):
+// dark on a light page, light on a dark one.
 import Icon from './Icon.astro';
 import PlacePin from './PlacePin.astro';
 import Polaroid from '../Polaroid.astro';
 import { entries, moods, locales } from '../../entries';
 import type { Lang } from '../../i18n';
 
-interface Props { lang: Lang; note: string }
-const { lang, note } = Astro.props;
+interface Props { lang: Lang }
+const { lang } = Astro.props;
 const list = entries[lang];
 const t = {
-  en: { today: 'Today', feeling: 'Feeling', reason: 'Reason', who: 'Who', where: 'Where', addPeople: 'Add people' },
-  id: { today: 'Hari ini', feeling: 'Perasaan', reason: 'Alasan', who: 'Siapa', where: 'Di mana', addPeople: 'Tambah orang' },
+  en: { today: 'Today', feeling: 'Feeling', reason: 'Reason', who: 'Who', where: 'Where', },
+  id: { today: 'Hari ini', feeling: 'Perasaan', reason: 'Alasan', who: 'Siapa', where: 'Di mana' },
 }[lang];
 const tilts = [4, -4, 8];
 ---
 <figure class="compose" data-compose data-locale={locales[lang]} data-days={list.map((e) => e.daysAgo).join(',')}
-  data-moods={list.map((e) => e.mood).join(',')} role="img" aria-label={`${list[0].title}. ${list[0].body}`}>
-  <div class="sheet" aria-hidden="true">
+  data-moods={list.map((e) => e.mood).join(',')} data-people={list.map((e) => (e.person ? 1 : 0)).join(',')} role="img" aria-label={`${list[0].title}. ${list[0].body}`}>
+  <div class="sheet inverse" aria-hidden="true">
     <p class="label date" data-date>{t.today}</p>
 
     <p class="slot title">
@@ -49,19 +50,17 @@ const tilts = [4, -4, 8];
       </div>
     </div>
 
-    <div class="section row" data-step>
+    <div class="section row" data-step data-who hidden={!list[0].person}>
       <p class="label"><Icon name="users" size={15} />{t.who}</p>
       <span class="slot value">
-        {list.map((e, i) => (
-          <span class:list={['e', { on: i === 0, add: !e.person }]} data-e={i}>{e.person ?? t.addPeople}</span>
-        ))}
+        {list.map((e, i) => <span class:list={['e', { on: i === 0 }]} data-e={i} data-type>{e.person ?? ''}</span>)}
       </span>
     </div>
 
     <div class="section row" data-step>
       <p class="label"><Icon name="mapPin" size={15} />{t.where}</p>
       <span class="slot value">
-        {list.map((e, i) => <span class:list={['e', 'place', { on: i === 0 }]} data-e={i}><PlacePin size={16} />{e.place}</span>)}
+        {list.map((e, i) => <span class:list={['e', 'place', { on: i === 0 }]} data-e={i}><span class="pin"><PlacePin size={16} /></span><span class="name">{e.place}</span></span>)}
       </span>
     </div>
   </div>
@@ -70,16 +69,12 @@ const tilts = [4, -4, 8];
   <div class="photo" aria-hidden="true">
     <div class="stack" data-stack>
       {list.map((e, i) => (
-        <Polaroid scene={e.scene} caption={e.caption} tilt={tilts[i]} seed={i + 1}
+        <Polaroid scene={e.scene} caption={e.place} tilt={tilts[i]} seed={i + 1}
           class={`print p${i}${i === 0 ? ' landed' : ''}`} />
       ))}
     </div>
   </div>
 
-  <p class="note" data-note aria-hidden="true">
-    <svg viewBox="0 0 60 30" width="46" height="23"><path d="M58 4 C40 6 22 12 8 24 M8 24 L9 14 M8 24 L18 23" /></svg>
-    {note}
-  </p>
 </figure>
 
 <script>
@@ -105,13 +100,18 @@ const tilts = [4, -4, 8];
 
     function run(fig: HTMLElement) {
       const count = days.length;
+      const people = (fig.dataset.people ?? '').split(',').map((v) => v === '1');
       const steps = [...fig.querySelectorAll<HTMLElement>('[data-step]')];
+      const whoRow = fig.querySelector<HTMLElement>('[data-who]')!;
       const moodChips = [...fig.querySelectorAll<HTMLElement>('.mood')];
       const prints = [...fig.querySelectorAll<HTMLElement>('.print')];
-      const note = fig.querySelector<HTMLElement>('[data-note]')!;
       const sheet = fig.querySelector<HTMLElement>('.sheet')!;
       const caret = document.createElement('span');
       caret.className = 'caret';
+
+      // Hold the sheet at its tallest (with the Who row), so days without people don't jump.
+      whoRow.hidden = false;
+      sheet.style.minHeight = `${sheet.offsetHeight}px`;
 
       // Run only while the hero is on screen and the tab is visible.
       let onScreen = true;
@@ -128,6 +128,7 @@ const tilts = [4, -4, 8];
       });
 
       // Split each typed text into a written part and a hidden remainder that holds its space.
+      // Order in the DOM: titles, bodies, people (one per day each).
       const typers = [...fig.querySelectorAll<HTMLElement>('[data-type]')];
       const texts = new Map(typers.map((el) => [el, el.textContent ?? '']));
       for (const el of typers) {
@@ -153,16 +154,28 @@ const tilts = [4, -4, 8];
         }
       };
 
+      // A finger tap: a soft ink ring where it lands, the chip pressed, then chosen.
+      const tap = async (chip: HTMLElement) => {
+        const ring = document.createElement('span');
+        ring.className = 'tap';
+        chip.append(ring);
+        chip.classList.add('pressing');
+        await wait(130);
+        chip.classList.remove('pressing');
+        chip.classList.add('picked');
+        setTimeout(() => ring.remove(), 700);
+      };
+
       const show = (i: number) => {
         for (const el of fig.querySelectorAll<HTMLElement>('[data-e]')) el.classList.toggle('on', el.dataset.e === String(i));
+        whoRow.hidden = !people[i];
         setDate(i);
         fig.setAttribute('aria-label', `${texts.get(typers[i])}. ${texts.get(typers[count + i])}`);
       };
       const reset = () => {
         typers.forEach(clear);
         steps.forEach((s) => s.classList.remove('shown'));
-        fig.querySelectorAll('.picked').forEach((c) => c.classList.remove('picked'));
-        note.classList.remove('shown');
+        fig.querySelectorAll('.picked, .dropped').forEach((c) => c.classList.remove('picked', 'dropped'));
       };
 
       fig.classList.add('staged');
@@ -175,17 +188,23 @@ const tilts = [4, -4, 8];
         await type(typers[i], 55);          // title
         await wait(300);
         await type(typers[count + i], 15);  // body
+        caret.remove();
         await wait(450);
         for (const [n, step] of steps.entries()) {
+          if (step.hidden) continue;
           step.classList.add('shown');
-          await wait(240);
-          const picks = n === 0 ? [moodChips[moodOf[i]]] : [...step.querySelectorAll<HTMLElement>('.e.on [data-pick]')];
-          for (const pick of picks) {
-            pick.classList.add('picked');
-            if (n === 0) note.classList.add('shown');
-            await wait(260);
+          await wait(300);
+          if (step === whoRow) {
+            await type(typers[2 * count + i], 60);   // the person, typed in
+            caret.remove();
+          } else if (n === steps.length - 1) {
+            step.querySelector('.place.on')?.classList.add('dropped');   // the pin drops in
+            await wait(500);
+          } else {
+            const picks = n === 0 ? [moodChips[moodOf[i]]] : [...step.querySelectorAll<HTMLElement>('.e.on [data-pick]')];
+            for (const pick of picks) { await tap(pick); await wait(320); }
           }
-          await wait(120);
+          await wait(140);
         }
         const print = prints[i];
         print.style.zIndex = String(++z);
@@ -203,8 +222,6 @@ const tilts = [4, -4, 8];
       };
 
       (async () => {
-        prints.forEach((p, n) => n > 0 && p.classList.remove('landed'));
-        prints[0].classList.remove('landed');
         for (let i = 0; ; i = (i + 1) % count) {
           if (i === 0) prints.forEach((p) => p.classList.remove('landed'));
           await write(i);
@@ -220,6 +237,7 @@ const tilts = [4, -4, 8];
   .compose { position: relative; margin: 0; }
   .sheet {
     position: relative;
+    color: var(--ink);
     padding: 1.5rem 1.5rem 1.75rem;
     background-color: var(--paper);
     background-image: radial-gradient(circle, color-mix(in srgb, var(--ink-3) 35%, transparent) 0.75px, transparent 1.1px);
@@ -247,6 +265,13 @@ const tilts = [4, -4, 8];
   .value { font-size: 1.0625rem; }
   .value .add { font-size: 0.9375rem; color: var(--ink-2); text-decoration: underline; text-decoration-thickness: var(--hairline); text-underline-offset: 0.2em; }
   .place { display: inline-flex; align-items: center; gap: 0.5rem; }
+  .pin, .name { display: inline-flex; }
+  /* The place is chosen: the pin drops onto the line, then the name settles in. */
+  .staged .place:not(.dropped) .pin { opacity: 0; translate: 0 -0.9rem; }
+  .staged .place:not(.dropped) .name { opacity: 0; filter: blur(4px); }
+  .staged .place.dropped .pin { animation: pin-drop 420ms var(--ease) both; }
+  .staged .place.dropped .name { animation: bloom 320ms ease-out 240ms both; }
+  @keyframes pin-drop { from { opacity: 0; translate: 0 -0.9rem; } 70% { opacity: 1; } }
 
   .chips { display: flex; flex-wrap: wrap; gap: 0.375rem; }
   /* DESIGN.md chip: callout serif, 0.5pt rule outline, 2px radius */
@@ -259,6 +284,17 @@ const tilts = [4, -4, 8];
   }
   .chip i { width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3); transition: background-color 200ms ease-out; }
   .chip.on { background: var(--paper-raised); color: var(--ink); border-color: var(--teak); }
+  .chip { position: relative; transition: scale 120ms ease-out, background-color 200ms ease-out, border-color 200ms ease-out, color 200ms ease-out; }
+  .chip.pressing { scale: 0.95; }
+  /* Where a finger lands: a soft ink ring that opens and fades. */
+  .chip :global(.tap) {
+    position: absolute; left: 50%; top: 50%;
+    width: 2.75rem; height: 2.75rem; margin: -1.375rem 0 0 -1.375rem;
+    border-radius: 50%; background: var(--ink); pointer-events: none;
+    animation: tap 620ms ease-out forwards;
+  }
+  @keyframes tap { from { scale: 0.2; opacity: 0.28; } to { scale: 1.7; opacity: 0; } }
+  .row[hidden] { display: none; }
   .chip.on i { background: var(--teak); }
 
   /* Phones: the stack hangs below the sheet, clear of the rows. */
@@ -276,16 +312,6 @@ const tilts = [4, -4, 8];
   .stack:hover :global(.p1), .stack.fanned :global(.p1) { rotate: -13deg; translate: -62% 6%; }
   .stack:hover :global(.p2), .stack.fanned :global(.p2) { rotate: 14deg; translate: 52% 4%; }
 
-  /* A margin note under the sheet, pointing back up at the mood. */
-  .note {
-    display: flex; align-items: flex-start; gap: 0.25rem;
-    margin: 1.25rem 0 0 0.5rem;
-    font-family: var(--hand); font-size: 1.3125rem; line-height: 1.1;
-    color: var(--teak); rotate: -2deg;
-    max-width: min(16rem, calc(100% - 9.5rem));
-  }
-  .note svg { flex: none; rotate: 70deg; margin-top: -0.75rem; }
-  .note path { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
   /* Staged by the script only. */
   .staged :global(.rest) { visibility: hidden; }
@@ -299,8 +325,6 @@ const tilts = [4, -4, 8];
   .staged .chip:not(.picked) i { background: var(--ink-3); }
   .staged .chip.picked { background: var(--paper-raised); color: var(--ink); border-color: var(--teak); }
   .staged .chip.picked i { background: var(--teak); }
-  .staged .note { opacity: 0; filter: blur(4px); transition: opacity 320ms ease-out, filter 320ms ease-out; }
-  .staged .note.shown { opacity: 1; filter: none; }
   /* A print lands: from above, turned, then set down. */
   .staged :global(.print) { opacity: 0; }
   .staged :global(.print.landed) { opacity: 1; animation: land 640ms var(--ease) both; }

@@ -14,6 +14,7 @@ export const chrome = {
     support: 'Support',
     copyright: '© 2026 Muhammad Darrel Prawira',
     tagline: 'A quiet place for your days.',
+    toDark: 'Switch to dark', toLight: 'Switch to light',
   },
   id: {
     other: 'en',
@@ -25,6 +26,7 @@ export const chrome = {
     support: 'Bantuan',
     copyright: '© 2026 Muhammad Darrel Prawira',
     tagline: 'Ruang tenang untuk harimu.',
+    toDark: 'Ganti ke mode gelap', toLight: 'Ganti ke mode terang',
   },
 } as const;
 
@@ -42,4 +44,13 @@ export const legal = {
     terms: { title: 'Ketentuan Penggunaan · Oku', description: 'Ketentuan pemakaian Oku, aplikasi jurnal untuk iPhone.' },
     support: { title: 'Bantuan · Oku', description: 'Pertanyaan yang sering ditanya tentang Oku, dan cara menghubungi kami.' },
   },
+} as const;
+
+// Flip `live` to true the day Oku is on the App Store: the badges then link to the listing.
+// Until then they read "coming soon" and link nowhere (Apple ID 6818423084).
+export const appStore = {
+  live: false,
+  url: 'https://apps.apple.com/app/id6818423084',
+  soon: { en: 'Coming soon to the App Store', id: 'Segera di App Store' },
+  alt: { en: 'Download on the App Store', id: 'Download di App Store' },
 } as const;

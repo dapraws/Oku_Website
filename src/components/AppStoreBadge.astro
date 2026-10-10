@@ -1,0 +1,43 @@
+---
+// Apple's official badge (Apple Marketing Tools, unmodified): black on light paper, white on
+// dark. Before launch it is a quiet line instead, so nothing links to a missing listing.
+import blackEn from '../assets/badges/app-store-black-en-us.svg?raw';
+import whiteEn from '../assets/badges/app-store-white-en-us.svg?raw';
+import blackId from '../assets/badges/app-store-black-id-id.svg?raw';
+import whiteId from '../assets/badges/app-store-white-id-id.svg?raw';
+import { appStore, type Lang } from '../i18n';
+
+interface Props { lang: Lang; class?: string }
+const { lang, class: className } = Astro.props;
+const svg = (raw: string) => raw.replace(/<title>.*?<\/title>/, '').replace('<svg ', '<svg aria-hidden="true" ');
+const black = svg(lang === 'en' ? blackEn : blackId);
+const white = svg(lang === 'en' ? whiteEn : whiteId);
+---
+{appStore.live ? (
+  <a class:list={['badge', className]} href={appStore.url} aria-label={appStore.alt[lang]}>
+    <span class="on-light" set:html={black} />
+    <span class="on-dark" set:html={white} />
+  </a>
+) : (
+  <p class:list={['soon', 'label', className]}>{appStore.soon[lang]}</p>
+)}
+
+<style>
+  .badge { display: inline-flex; height: 2.75rem; }
+  .badge span { display: inline-flex; height: 100%; }
+  .badge :global(svg) { height: 100%; width: auto; }
+  .on-dark { display: none !important; }
+  :global(:root[data-theme='dark']) .on-light { display: none !important; }
+  :global(:root[data-theme='dark']) .on-dark { display: inline-flex !important; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .on-light { display: none !important; }
+    :global(:root:not([data-theme='light'])) .on-dark { display: inline-flex !important; }
+  }
+  .soon {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    min-height: 2.75rem; padding: 0 1rem;
+    border: var(--hairline) solid var(--ink-3); border-radius: 4px;
+    color: var(--ink);
+  }
+  .soon::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--teak); }
+</style>
