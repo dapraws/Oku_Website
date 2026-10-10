@@ -1,0 +1,10 @@
+---
+// A corner of the real Stories map (Bali, with the Kuta pin), cropped from the app capture.
+import { Image } from 'astro:assets';
+import en from '../../assets/screens/en/map-bali.webp';
+import id from '../../assets/screens/id/map-bali.webp';
+import type { Lang } from '../../i18n';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+---
+<Image src={lang === 'en' ? en : id} alt="" widths={[240, 440]} sizes="15rem" loading="lazy" />

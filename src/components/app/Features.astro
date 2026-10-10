@@ -6,6 +6,8 @@
 import Icon from './Icon.astro';
 import PlacePin from './PlacePin.astro';
 import Polaroid from '../Polaroid.astro';
+import Person from './Person.astro';
+import Screenshot from './MapCrop.astro';
 import { moods } from '../../entries';
 import type { Lang } from '../../i18n';
 
@@ -20,7 +22,7 @@ const t = {
     voice: 'Voice note', voiceNote: 'Turned into text on your iPhone',
     now: 'now', reminder: 'The page waits.', reminderLabel: 'Daily reminder',
     unlock: 'Unlock with Face ID',
-    who: 'Who', people: ['Damon', 'Mum', 'Nadia'],
+    who: 'Who', people: ['Dimas', 'Mum', 'Najla'],
     reason: 'Reason', limit: 'Up to 3.', reasons: ['Work', 'Family', 'Friends', 'Self', 'Health', 'Food', 'Love', 'Hobbies'],
     photos: 'Photos', captions: ['the long way round', 'golden hour', 'rain again'],
     where: 'Where', language: 'Language',
@@ -32,7 +34,7 @@ const t = {
     voice: '', voiceNote: '',
     now: 'sekarang', reminder: 'Halaman menunggu.', reminderLabel: 'Pengingat harian',
     unlock: 'Buka dengan Face ID',
-    who: 'Siapa', people: ['Damon', 'Ibu', 'Nadia'],
+    who: 'Siapa', people: ['Dimas', 'Ibu', 'Najla'],
     reason: 'Alasan', limit: 'Maksimal 3.', reasons: ['Kerja', 'Keluarga', 'Teman', 'Diri sendiri', 'Kesehatan', 'Makanan', 'Cinta', 'Hobi'],
     photos: 'Foto', captions: ['jalan memutar', 'jam emas', 'hujan lagi'],
     where: 'Di mana', language: 'Bahasa',
@@ -41,6 +43,8 @@ const t = {
 
 // [phrase] → a phrase that gets a hand-drawn teak underline.
 const parts = t.body.split(/(\[[^\]]+\])/).map((p) => (p.startsWith('[') ? { mark: p.slice(1, -1) } : { text: p }));
+// Reason chips carry a small drawing of what they mean (Phosphor, as in the app).
+const reasonIcons = ['briefcase', 'house', 'usersThree', 'flowerLotus', 'heartbeat', 'bowlFood', 'heart', 'palette'] as const;
 const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.6)));
 ---
 <div class="board" data-board>
@@ -88,13 +92,26 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
     <div class="piece lock" style="--d: 8s; --o: -0.8s; --r: -1.5deg">
       <span class="lock-mark"><b></b></span>
       <p class="lock-word">Oku</p>
+      <!-- Face ID: the frame finds a face, then a tick; on a loop while in view. -->
+      <div class="faceid">
+        <svg class="scan" viewBox="0 0 48 48">
+          <path d="M4 14V9a5 5 0 0 1 5-5h5 M34 4h5a5 5 0 0 1 5 5v5 M44 34v5a5 5 0 0 1-5 5h-5 M14 44H9a5 5 0 0 1-5-5v-5" />
+          <path class="face" d="M17 17v4 M31 17v4 M24 18v8h-2 M18 32q6 4 12 0" />
+        </svg>
+        <svg class="done" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="19" pathLength="1" />
+          <path d="M16 24.5l5.5 5.5 11-12" pathLength="1" />
+        </svg>
+      </div>
       <p class="lock-action">{t.unlock}</p>
     </div>
 
     <div class="piece who" style="--d: 7.4s; --o: -2.6s; --r: 2deg">
       <p class="label"><Icon name="users" size={14} />{t.who}</p>
       <div class="faces">
-        {t.people.map((p) => <span class="face">{p[0]}</span>)}
+        <Person who="dimas" />
+        <Person who="mum" />
+        <Person who="najla" />
       </div>
       <p class="names">{t.people.join(', ')}</p>
     </div>
@@ -102,7 +119,7 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
     <div class="piece reasons" style="--d: 8.8s; --o: -1.6s; --r: -1deg">
       <p class="label"><Icon name="question" size={14} />{t.reason}</p>
       <div class="reason-chips" data-reasons>
-        {t.reasons.map((r) => <span class="chip">{r}</span>)}
+        {t.reasons.map((r, i) => <span class="chip"><Icon name={reasonIcons[i]} size={14} />{r}</span>)}
       </div>
       <p class="limit">{t.limit}</p>
     </div>
@@ -122,14 +139,7 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
 
     <div class="piece where" style="--d: 9.4s; --o: -2.2s; --r: -2deg">
       <p class="label"><Icon name="mapPin" size={14} />{t.where}</p>
-      <div class="map">
-        <svg viewBox="4 10 268 64" aria-hidden="true">
-          <path class="land" d="M10,40 C30,30 60,31 90,37 C120,43 150,39 180,45 C200,49 220,51 232,57 L229,65 C205,63 180,61 150,57 C120,55 90,57 60,53 C40,51 20,51 12,49 Z" />
-          <path class="land" d="M240,58 C248,53 259,55 266,59 C263,66 252,68 243,64 Z" />
-          <path class="land" d="M200,18 C215,14 240,16 262,22 L258,27 C236,24 214,23 202,25 Z" />
-        </svg>
-        <span class="map-pin"><PlacePin size={18} /></span>
-      </div>
+      <div class="map"><Screenshot lang={lang} /></div>
       <p class="place">Kuta</p>
     </div>
   </div>
@@ -239,23 +249,23 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
 
   /* Desktop: the pieces float in a loose ring around the paragraph. */
   @media (min-width: 64rem) {
-    .board { min-height: 50rem; display: grid; place-items: center; padding: 4rem 0 8rem; }
+    .board { min-height: 54rem; display: grid; place-items: center; padding: 6rem 0 8rem; }
     .center { max-width: 34rem; }
     .pieces { position: absolute; inset: 0; display: block; margin: 0; }
     .piece { position: absolute; width: 14rem; }
-    .mood-scale { left: 0; top: 2%; }
-    .where { left: 21%; top: -5%; width: 12rem; }
-    .notice { right: 0; top: 0; width: 18rem; }
-    .lock { right: 3%; top: 27%; width: 11rem; }
-    .borrow { left: 0; top: 36%; width: 15rem; }
-    .who { left: 2%; bottom: 4%; width: 13rem; }
+    /* Two loose columns beside the paragraph, a few pieces above and below it. */
+    .mood-scale { left: 1%; top: 6%; }
+    .where { left: 3%; top: 36%; width: 15rem; }
+    .borrow { left: 0; bottom: 8%; width: 15rem; }
+    .notice { right: 0; top: 4%; width: 18rem; }
+    .lock { right: 5%; top: 33%; width: 11rem; }
     .photos { right: 1%; bottom: 6%; width: 12rem; }
-    .voice { left: 21%; bottom: -8%; }
-    .reasons { right: 19%; bottom: -8%; width: 17rem; }
-    .lang { left: 41%; bottom: -12%; width: 13rem; }
+    .voice { left: 24%; top: -4%; }
+    .lang { right: 25%; top: -6%; width: 13rem; }
+    .who { left: 25%; bottom: -5%; width: 14rem; }
+    .reasons { right: 22%; bottom: -8%; width: 19rem; }
   }
   @media (max-width: 63.99rem) {
-    .lock { display: none; }
     .piece { width: 86%; }
     .piece:nth-child(even) { justify-self: end; }
   }
@@ -300,6 +310,24 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
   .lock-mark b { width: 100%; height: 100%; border-radius: 50%; border: 1.5px solid var(--ink); display: grid; place-items: center; }
   .lock-mark b::after { content: ''; width: 30%; height: 30%; border-radius: 50%; background: var(--ink); }
   .lock-word { font-size: 1.125rem; margin: 0.25rem 0 0.75rem !important; }
+  .faceid { position: relative; width: 3rem; height: 3rem; margin: 0 auto 0.75rem; color: var(--ink); }
+  .faceid svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .done { color: var(--teak); opacity: 0; }
+  .done circle, .done path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  @media (prefers-reduced-motion: no-preference) {
+    .board.live .scan { animation: scan 5.4s ease-in-out infinite; transform-origin: center; }
+    .board.live .scan .face { animation: look 5.4s ease-in-out infinite; }
+    .board.live .done { animation: unlocked 5.4s ease-out infinite; }
+    .board.live .done circle, .board.live .done path { animation: tick 5.4s ease-out infinite; }
+  }
+  @keyframes scan {
+    0%, 8% { opacity: 1; scale: 1; }
+    20% { scale: 0.86; } 32% { scale: 1; } 44% { scale: 0.9; }
+    52% { opacity: 1; scale: 0.9; } 58%, 100% { opacity: 0; scale: 0.8; }
+  }
+  @keyframes look { 0%, 12% { translate: 0 0; } 22% { translate: -2px 0; } 34% { translate: 2px 0; } 44%, 100% { translate: 0 0; } }
+  @keyframes unlocked { 0%, 54% { opacity: 0; } 60%, 88% { opacity: 1; } 96%, 100% { opacity: 0; } }
+  @keyframes tick { 0%, 56% { stroke-dashoffset: 1; } 74%, 100% { stroke-dashoffset: 0; } }
   .lock-action { font-size: 0.875rem; text-decoration: underline; text-decoration-thickness: var(--hairline); text-underline-offset: 0.2em; }
 
 
@@ -314,24 +342,18 @@ const bars = Array.from({ length: 22 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.si
 
   /* Where: a small paper map of Java and Bali with the pin set down. */
   .map { position: relative; border-radius: 2px; background: var(--paper-sunken); overflow: hidden; }
-  .map svg { display: block; width: 100%; height: auto; }
-  .land { fill: color-mix(in srgb, var(--ink-3) 28%, var(--paper)); stroke: var(--ink-3); stroke-width: 0.75; }
-  .map-pin { position: absolute; left: 89%; top: 70%; translate: -50% -50%; display: flex; }
+  .map :global(img) { display: block; width: 100%; height: auto; }
   .place { margin-top: 0.5rem !important; font-size: 1.0625rem; }
 
   /* Who: the people in a day, as initials. */
   .faces { display: flex; }
-  .face {
-    width: 2.25rem; height: 2.25rem; margin-right: -0.5rem; border-radius: 50%;
-    display: grid; place-items: center; font-size: 1rem;
-    background: var(--paper-sunken); border: 2px solid var(--paper-raised); color: var(--ink);
-  }
-  .face:nth-child(2) { background: var(--teak-faded); }
+  .faces :global(.person) { width: 4rem; height: 4rem; margin-right: -0.875rem; }
   .names { margin-top: 0.5rem !important; font-size: 0.9375rem; }
 
   /* Reason: up to three, chosen in teak. */
   .reason-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
   .reason-chips .chip {
+    display: inline-flex; align-items: center; gap: 0.3rem;
     padding: 0.25rem 0.55rem; font-size: 0.8125rem; color: var(--ink-2);
     border: var(--hairline) solid var(--rule); border-radius: 2px;
     transition: background-color 260ms ease-out, border-color 260ms ease-out, color 260ms ease-out;

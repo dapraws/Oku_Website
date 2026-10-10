@@ -8,8 +8,19 @@ import image from '@phosphor-icons/core/regular/image.svg?raw';
 import notebook from '@phosphor-icons/core/regular/notebook.svg?raw';
 import calendarDots from '@phosphor-icons/core/regular/calendar-dots.svg?raw';
 import calendarCheck from '@phosphor-icons/core/regular/calendar-check.svg?raw';
+import briefcase from '@phosphor-icons/core/regular/briefcase.svg?raw';
+import house from '@phosphor-icons/core/regular/house.svg?raw';
+import usersThree from '@phosphor-icons/core/regular/users-three.svg?raw';
+import flowerLotus from '@phosphor-icons/core/regular/flower-lotus.svg?raw';
+import heartbeat from '@phosphor-icons/core/regular/heartbeat.svg?raw';
+import bowlFood from '@phosphor-icons/core/regular/bowl-food.svg?raw';
+import heart from '@phosphor-icons/core/regular/heart.svg?raw';
+import palette from '@phosphor-icons/core/regular/palette.svg?raw';
 
-const icons = { smiley, question, users, mapPin, image, notebook, calendarDots, calendarCheck };
+const icons = {
+  smiley, question, users, mapPin, image, notebook, calendarDots, calendarCheck,
+  briefcase, house, usersThree, flowerLotus, heartbeat, bowlFood, heart, palette,
+};
 export type IconName = keyof typeof icons;
 
 interface Props { name: IconName; size?: number }
