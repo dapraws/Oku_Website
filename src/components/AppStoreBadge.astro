@@ -1,6 +1,6 @@
 ---
 // Apple's official badge (Apple Marketing Tools, unmodified): black on light paper, white on
-// dark. Before launch it is a quiet line instead, so nothing links to a missing listing.
+// dark. Before launch it is a TestFlight invite instead, so nothing links to a missing listing.
 import blackEn from '../assets/badges/app-store-black-en-us.svg?raw';
 import whiteEn from '../assets/badges/app-store-white-en-us.svg?raw';
 import blackId from '../assets/badges/app-store-black-id-id.svg?raw';
@@ -19,7 +19,7 @@ const white = svg(lang === 'en' ? whiteEn : whiteId);
     <span class="on-dark" set:html={white} />
   </a>
 ) : (
-  <p class:list={['soon', 'label', className]}>{appStore.soon[lang]}</p>
+  <a class:list={['soon', 'label', className]} href={appStore.beta}>{appStore.betaLabel[lang]}</a>
 )}
 
 <style>
@@ -38,6 +38,9 @@ const white = svg(lang === 'en' ? whiteEn : whiteId);
     min-height: 2.75rem; padding: 0 1rem;
     border: var(--hairline) solid var(--ink-3); border-radius: 4px;
     color: var(--ink);
+    text-decoration: underline; text-decoration-thickness: var(--hairline); text-underline-offset: 0.3em;
+    transition: border-color 200ms ease-out;
   }
+  .soon:hover { border-color: var(--ink); }
   .soon::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--teak); }
 </style>

@@ -53,6 +53,8 @@ export const legal = {
 export const appStore = {
   live: false,
   url: 'https://apps.apple.com/app/id6818423084',
-  soon: { en: 'Coming soon to the App Store', id: 'Segera di App Store' },
+  // While the app waits for review, the badge's place is a TestFlight invite.
+  beta: 'https://testflight.apple.com/join/fYEVdVS8',
+  betaLabel: { en: 'Join the beta on TestFlight', id: 'Ikut beta di TestFlight' },
   alt: { en: 'Download on the App Store', id: 'Download di App Store' },
 } as const;
