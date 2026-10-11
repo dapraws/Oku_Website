@@ -416,9 +416,13 @@ const year = new Date().getFullYear();
   .dot :focus-visible { outline-color: var(--paper); }
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: view()) {
-      .dot { animation: grow linear both; animation-timeline: view(); animation-range: entry 0% cover 45%; }
-      .dot-text { animation: arrive linear both; animation-timeline: view(); animation-range: entry 60% cover 50%; }
-      .rings { animation: close-in linear both; animation-timeline: --dot; animation-range: entry 0% cover 50%; }
+      .dot { animation: grow linear both; animation-range: entry 0% cover 45%; }
+      .dot-text { animation: arrive linear both; animation-range: entry 60% cover 50%; }
+      .rings { animation: close-in linear both; animation-range: entry 0% cover 50%; }
+      /* Timelines sit in their own rules: the minifier folds a same-rule animation-timeline
+         into the animation shorthand, where it is invalid and the whole animation is dropped. */
+      .dot-wrap .dot, .dot-wrap .dot-text { animation-timeline: view(); }
+      .inward .rings { animation-timeline: --dot; }
     }
   }
   @keyframes grow { from { scale: 0.06; } }
