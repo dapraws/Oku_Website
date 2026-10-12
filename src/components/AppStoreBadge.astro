@@ -19,7 +19,10 @@ const white = svg(lang === 'en' ? whiteEn : whiteId);
     <span class="on-dark" set:html={white} />
   </a>
 ) : (
-  <a class:list={['soon', 'label', className]} href={appStore.beta}>{appStore.betaLabel[lang]}</a>
+  <p class:list={['beta', className]}>
+    <a href={appStore.beta}>{appStore.betaLabel[lang]}<span aria-hidden="true"> ›</span></a>
+    <span class="soon">{appStore.soon[lang]}</span>
+  </p>
 )}
 
 <style>
@@ -33,14 +36,9 @@ const white = svg(lang === 'en' ? whiteEn : whiteId);
     :global(:root:not([data-theme='light'])) .on-light { display: none !important; }
     :global(:root:not([data-theme='light'])) .on-dark { display: inline-flex !important; }
   }
-  .soon {
-    display: inline-flex; align-items: center; gap: 0.6rem;
-    min-height: 2.75rem; padding: 0 1rem;
-    border: var(--hairline) solid var(--ink-3); border-radius: 4px;
-    color: var(--ink);
-    text-decoration: underline; text-decoration-thickness: var(--hairline); text-underline-offset: 0.3em;
-    transition: border-color 200ms ease-out;
-  }
-  .soon:hover { border-color: var(--ink); }
-  .soon::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--teak); }
+  /* Before launch: an apple.com-style text link to the beta, with a quiet line under it. */
+  .beta { display: grid; gap: 0.25rem; margin: 0; }
+  .beta a { font-size: 1.1875rem; color: var(--teak); text-decoration: none; }
+  .beta a:hover { text-decoration: underline; text-decoration-thickness: var(--hairline); text-underline-offset: 0.2em; }
+  .beta .soon { font-size: 0.875rem; color: var(--ink-2); }
 </style>

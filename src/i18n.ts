@@ -55,6 +55,7 @@ export const appStore = {
   url: 'https://apps.apple.com/app/id6818423084',
   // While the app waits for review, the badge's place is a TestFlight invite.
   beta: 'https://testflight.apple.com/join/fYEVdVS8',
-  betaLabel: { en: 'Join the beta on TestFlight', id: 'Ikut beta di TestFlight' },
+  betaLabel: { en: 'Join the TestFlight beta', id: 'Ikut beta TestFlight' },
+  soon: { en: 'Coming soon to the App Store', id: 'Segera di App Store' },
   alt: { en: 'Download on the App Store', id: 'Download di App Store' },
 } as const;
