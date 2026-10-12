@@ -200,7 +200,8 @@ const year = new Date().getFullYear();
         const c = document.createElementNS(ns, 'circle');
         c.setAttribute('cx', String(cx));
         c.setAttribute('cy', String(cy));
-        c.setAttribute('r', String(cy - (s.getBoundingClientRect().top - box.top) + 32));
+        // The top of each ring sits just inside its section, clear of the header.
+        c.setAttribute('r', String(cy - (s.getBoundingClientRect().top - box.top) - 40));
         svg.append(c);
       }
     };
